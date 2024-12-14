@@ -198,7 +198,7 @@
 
 			var userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-			if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+			if (/iPad|iPhone|iPod|Mac OS/.test(userAgent) && !window.MSStream) {
 				$(".button.ios").addClass("highlight");
 			} else if (/android/i.test(userAgent)) {
 				$(".button.android").addClass("highlight");
