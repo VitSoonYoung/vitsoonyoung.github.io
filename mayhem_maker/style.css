@@ -1,0 +1,652 @@
+/* --- Keyword Wall Background --- */
+#keyword-wall {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+  column-count: 3;
+  column-gap: 1.5rem;
+  opacity: 0;
+  animation: kwwall-fadein 1.2s ease forwards;
+}
+
+@keyframes kwwall-fadein {
+  from { opacity: 0; }
+  to   { opacity: .4; }
+}
+
+.kw-wall-word {
+  display: block;
+  font-family: 'FrizQuadrata', serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  user-select: none;
+  line-height: 2.2;
+  break-inside: avoid;
+  text-align: center;
+}
+
+/* Make sections sit above the keyword wall */
+.section {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- LoL Client Border Frame --- */
+
+/* Outer glow on the whole page */
+body {
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8);
+}
+
+.lol-frame {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Corner ornaments — diamond / cross shape in gold */
+.lol-frame__corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  display: none;
+}
+
+.lol-frame__corner::before,
+.lol-frame__corner::after {
+  content: '';
+  position: absolute;
+  background: #c8aa6e;
+}
+
+/* Horizontal bar of cross */
+.lol-frame__corner::before {
+  width: 100%;
+  height: 2px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+/* Vertical bar of cross */
+.lol-frame__corner::after {
+  width: 2px;
+  height: 100%;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.lol-frame__corner--tl { top: 6px;  left: 6px; }
+.lol-frame__corner--tr { top: 6px;  right: 6px; }
+.lol-frame__corner--bl { bottom: 6px; left: 6px; }
+.lol-frame__corner--br { bottom: 6px; right: 6px; }
+
+/* Edge lines — outer gold, inner darker */
+.lol-frame__edge {
+  position: absolute;
+  background: transparent;
+}
+
+/* Top & bottom edges */
+.lol-frame__edge--t,
+.lol-frame__edge--b {
+  left: 26px;
+  right: 26px;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #785a28 8%,
+    #c8aa6e 20%,
+    #c8aa6e 80%,
+    #785a28 92%,
+    transparent 100%
+  );
+}
+.lol-frame__edge--t { top: 4px; }
+.lol-frame__edge--b { bottom: 4px; }
+
+/* Left & right edges */
+.lol-frame__edge--l,
+.lol-frame__edge--r {
+  top: 26px;
+  bottom: 26px;
+  width: 3px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    #785a28 8%,
+    #c8aa6e 20%,
+    #c8aa6e 80%,
+    #785a28 92%,
+    transparent 100%
+  );
+}
+.lol-frame__edge--l { left: 4px; }
+.lol-frame__edge--r { right: 4px; }
+
+/* Inner subtle border inset */
+html::before {
+  content: '';
+  position: fixed;
+  inset: 10px;
+  border: 1px solid rgba(120, 90, 40, 0.35);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* --- Fonts --- */
+@font-face {
+  font-family: 'FrizQuadrata';
+  src: url('assets/fonts/Friz Quadrata Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'FrizQuadrata';
+  src: url('assets/fonts/Friz Quadrata Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'FrizQuadrata';
+  src: url('assets/fonts/Friz Quadrata Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'FrizQuadrata';
+  src: url('assets/fonts/Friz Quadrata Std Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+/* --- Scrollbars (Webkit) --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c8651a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e07a20;
+}
+/* Firefox */
+* {
+  scrollbar-color: #978558 rgba(255, 255, 255, 0.05);
+}
+
+/* --- Scroll-up caret (top of preview section) --- */
+#scroll-up-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+  background: none;
+  border: none;
+  color: rgba(200, 101, 26, 0.85);
+  font-size: 3rem;
+  line-height: 1;
+  padding: 0.25rem 0;
+  margin-bottom: 0.25rem;
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+#scroll-up-btn:hover {
+  color: #e07a20;
+  transform: translateY(-3px);
+}
+
+/* Base */
+html, body {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  margin: 0;
+  padding: 0;
+  font-family: 'FrizQuadrata', serif;
+  color: #f6ebd6;
+  background: #0a0a0f;
+  /* Hide main page scrollbar while keeping scroll-snap functional */
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE / Edge legacy */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;                /* Chrome / Safari / WebKit */
+}
+
+/* Scroll-snap sections */
+.section {
+  height: 100vh;
+  scroll-snap-align: start;
+  overflow-y: auto;
+}
+
+/* Card Config Screen */
+#config-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* Card Preview Screen */
+#preview-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem 1rem;
+  box-sizing: border-box;
+  background: transparent;
+  overflow-y: auto;
+}
+
+/* --- Custom Icon Upload --- */
+.custom-icon-area {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 0.6rem;
+  padding: 0 0.25rem 0 0.25rem;
+  box-sizing: border-box;
+}
+
+.custom-icon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: transparent;
+  border: 2px dashed rgba(200, 170, 110, 0.4);
+  border-radius: 6px;
+  color: rgba(200, 170, 110, 0.6);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  font-family: 'FrizQuadrata', serif;
+}
+
+.custom-icon-btn:hover {
+  border-color: #c8aa6e;
+  color: #c8aa6e;
+  background: rgba(200, 170, 110, 0.06);
+}
+
+.custom-icon-plus {
+  font-size: 1.6rem;
+  line-height: 1;
+  font-weight: 300;
+}
+
+.custom-icon-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Active state when a custom icon is loaded */
+.custom-icon-btn.has-custom {
+  border-color: #c8aa6e;
+  border-style: solid;
+  color: #c8aa6e;
+}
+
+/* --- Screen Headers --- */
+.screen-header {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  padding: 1.5rem 0 0.5rem;
+  flex-shrink: 0;
+}
+
+.screen-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #c8aa6e;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.screen-subtitle {
+  margin: 0;
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.06em;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.preview-hint {
+  flex-shrink: 0;
+  padding-bottom: 0.5rem;
+}
+
+/* --- Tier Selection Row --- */
+#tier-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 1rem;
+  padding-top: 1.5rem;
+}
+
+.tier-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.rem;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 0;
+  cursor: pointer;
+  color: #ccc;
+  font-size: 0.75rem;
+  transition: border-color 0.15s;
+}
+
+.tier-btn:hover {
+  border-color: rgba(200, 170, 110, 0.5);
+}
+
+.tier-btn--active {
+  border-color: #c8aa6e;
+  color: #fff;
+}
+
+.tier-thumb {
+  width: auto;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.tier-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* --- Icon Grid --- */
+#icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 420px;
+  max-height: 45vh;
+  overflow-y: auto;
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+  box-sizing: border-box;
+}
+
+.icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  transition: border-color 0.15s;
+}
+
+.icon-btn:hover {
+  border-color: rgba(200, 170, 110, 0.5);
+}
+
+.icon-btn--active {
+  border-color: #c8aa6e;
+}
+
+.icon-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* --- Augment Card --- */
+#augment-card-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0;
+}
+
+.augment-card {
+  aspect-ratio: 2 / 3;
+  height: min(78vh, 520px);
+  width: auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  container-type: inline-size;
+}
+
+/* Tier background — fills entire card */
+.card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 1. Icon area — dark inset box, upper portion of card */
+.card-icon-wrap {
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  width: 80%;
+  height: 24%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
+  border-radius: 4px;
+}
+
+/* img tag hidden — icon rendered via background-image on wrap (html2canvas compatible) */
+.card-icon {
+  display: none;
+}
+
+/* 2. Title — full-width bordered box below icon */
+.card-title {
+  position: absolute;
+  top: 42%;
+  left: 7.5%;
+  width: 85%;
+  /* border: 1px solid rgba(255, 255, 255, 0.4); */
+  padding: 2% 4%;
+  color: #f0e6d2;
+  /* font-weight: bold; */
+  font-size: 4.5cqw;
+  text-align: center;
+  cursor: text;
+  min-height: 1.4em;
+  box-sizing: border-box;
+  outline: none;
+}
+
+/* 3. Ability tag — small centred pill badge */
+.card-tag {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  transform: translateX(-50%);
+  /* border: 1px solid rgba(255, 255, 255, 0.35); */
+  padding: 1% 3%;
+  color: rgb(4 15 15);
+  font-size: 2.8cqw;
+  text-align: center;
+  cursor: text;
+  white-space: nowrap;
+  outline: none;
+  border-radius: 3px;
+  background: #9f9c8c;
+  font-weight: 600;
+}
+
+/* 4. Description — bordered text box at bottom */
+.card-desc {
+  position: absolute;
+  top: 56%;
+  left: 22.5%;
+  width: 55%;
+  height: 21%;
+  /* border: 1px solid rgba(255, 255, 255, 0.3); */
+  padding: 2% 3%;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 2.8cqw;
+  line-height: 1.4;
+  text-align: left;
+  overflow: hidden;
+  cursor: text;
+  box-sizing: border-box;
+  outline: none;
+}
+
+/* Contenteditable placeholder text */
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+/* --- Keyword Highlighting --- */
+.kw {
+  /* font-weight: bold; */
+  /* color applied inline by JS */
+}
+
+.kw-icon {
+  height: 1em;
+  width: 1em;
+  vertical-align: middle;
+  margin-right: 0.15em;
+  object-fit: contain;
+}
+
+/* --- Export Controls --- */
+.export-controls {
+  display: flex;
+  flex-direction: row;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 420px;
+  padding: 0.75rem 0 0.25rem;
+}
+
+.export-controls button {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.55rem 0.75rem;
+  background: linear-gradient(180deg, #1a1610 0%, #0d0c09 100%);
+  border: none;
+  border-radius: 10px;
+  color: #c8aa6e;
+  font-family: 'FrizQuadrata', serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  /* clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px); */
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+/* Gold border via outline layer */
+.export-controls button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);
+  border: 1px solid #785a28;
+  border-radius: 2px;
+  pointer-events: none;
+  transition: border-color 0.15s;
+}
+
+.export-controls button:hover:not(:disabled) {
+  background: linear-gradient(180deg, #2a2010 0%, #1a1508 100%);
+  color: #f0d07a;
+  box-shadow: 0 0 10px rgba(200, 170, 110, 0.25), inset 0 0 8px rgba(200, 170, 110, 0.08);
+}
+
+.export-controls button:hover:not(:disabled)::before {
+  border-color: #c8aa6e;
+}
+
+.export-controls button:active:not(:disabled) {
+  background: linear-gradient(180deg, #0d0c09 0%, #1a1610 100%);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+}
+
+.btn--busy {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+}
+
+/* --- Error Banners --- */
+.error-banner {
+  background: rgba(200, 50, 50, 0.85);
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+/* --- SEO Footer (visually hidden, readable by crawlers) --- */
+.seo-footer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
