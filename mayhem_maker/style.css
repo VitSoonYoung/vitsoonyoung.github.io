@@ -528,10 +528,10 @@ body::-webkit-scrollbar {
   top: 56%;
   left: 22.5%;
   width: 55%;
-  height: 21%;
+  height: 30%;
   /* border: 1px solid rgba(255, 255, 255, 0.3); */
   padding: 2% 3%;
-  color: rgba(255, 255, 255, 0.9);
+  /* color: rgba(255, 255, 255, 0.9); */
   font-size: 2.8cqw;
   line-height: 1.4;
   text-align: left;

@@ -11,6 +11,53 @@ const state = {
 
 const TRANSPARENT_PIXEL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
+// ---------------------------------------------------------------------------
+// UndoHistory — per-field undo stack for contenteditable elements.
+// Stores plain-text snapshots so it survives innerHTML replacement.
+// ---------------------------------------------------------------------------
+class UndoHistory {
+  constructor({ maxSize = 200, debounceMs = 300 } = {}) {
+    this.stack = [];      // [{ text, caret }]
+    this.index = -1;      // current position in stack
+    this.maxSize = maxSize;
+    this.debounceMs = debounceMs;
+    this._timer = null;
+    this._isMutating = false; // suppress input events triggered by our own writes
+  }
+
+  // Record the current state immediately (e.g. on focus or Enter)
+  pushNow(text, caret) {
+    // Drop any redo-future
+    this.stack.splice(this.index + 1);
+    // Avoid duplicate consecutive entries
+    const top = this.stack[this.index];
+    if (top && top.text === text) return;
+    this.stack.push({ text, caret });
+    if (this.stack.length > this.maxSize) this.stack.shift();
+    this.index = this.stack.length - 1;
+  }
+
+  // Schedule a debounced push (collapses rapid keystrokes into one entry)
+  push(text, caret) {
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => this.pushNow(text, caret), this.debounceMs);
+  }
+
+  // Flush any pending debounced push immediately
+  flush(text, caret) {
+    clearTimeout(this._timer);
+    this.pushNow(text, caret);
+  }
+
+  canUndo() { return this.index > 0; }
+
+  undo() {
+    if (!this.canUndo()) return null;
+    this.index -= 1;
+    return this.stack[this.index];
+  }
+}
+
 // Bootstrap — fetch config then wire up the UI
 async function init() {
   try {
@@ -127,24 +174,74 @@ function renderCard() {
   highlightKeywords(descEl, state.desc, state.config.keywords);
 }
 
-// Returns the caret offset (in plain-text characters) within a contenteditable element
+// Returns the caret offset (in plain-text characters, counting \n for each <br>) within a contenteditable element
 function getCaretOffset(el) {
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0) return 0;
   const range = sel.getRangeAt(0).cloneRange();
   range.selectNodeContents(el);
   range.setEnd(sel.getRangeAt(0).endContainer, sel.getRangeAt(0).endOffset);
-  return range.toString().length;
+  // Walk the range contents manually so we count <br> as \n
+  let offset = 0;
+  const walker = document.createTreeWalker(
+    el,
+    NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+    {
+      acceptNode(node) {
+        if (node === el) return NodeFilter.FILTER_SKIP;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+  let node;
+  outer: while ((node = walker.nextNode())) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (node.nodeName === 'BR') offset += 1;
+      continue;
+    }
+    // Text node
+    if (node === range.endContainer) {
+      offset += range.endOffset;
+      break outer;
+    }
+    offset += node.textContent.length;
+  }
+  return offset;
 }
 
-// Restores the caret to a plain-text offset within a contenteditable element
+// Restores the caret to a plain-text offset (counting \n for each <br>) within a contenteditable element
 function setCaretOffset(el, offset) {
   const sel = window.getSelection();
   if (!sel) return;
   let remaining = offset;
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const walker = document.createTreeWalker(
+    el,
+    NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+    {
+      acceptNode(node) {
+        if (node === el) return NodeFilter.FILTER_SKIP;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
   let node;
   while ((node = walker.nextNode())) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (node.nodeName === 'BR') {
+        if (remaining === 0) {
+          // Place caret before the <br>
+          const range = document.createRange();
+          range.setStartBefore(node);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+          return;
+        }
+        remaining -= 1;
+      }
+      continue;
+    }
+    // Text node
     if (remaining <= node.textContent.length) {
       const range = document.createRange();
       range.setStart(node, remaining);
@@ -179,31 +276,33 @@ function highlightKeywords(descEl, text, keywords) {
   const entries = Object.entries(keywords);
   entries.sort((a, b) => b[0].length - a[0].length);
 
-  if (entries.length === 0) {
-    descEl.innerHTML = escapeHtml(text);
-    if (hasFocus && caretOffset !== null) setCaretOffset(descEl, caretOffset);
-    return;
+  // Helper: highlight keywords within a single line of plain text
+  function highlightLine(line) {
+    if (entries.length === 0) return escapeHtml(line);
+    const pattern = new RegExp(
+      '(?:(?:\\d+(?:\\.\\d+)?%?|\\d+(?:\\.\\d+)?)\\s+)?(?:' +
+      entries.map(([k]) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') +
+      ')',
+      'gi'
+    );
+    return line.replace(pattern, match => {
+      const kwMatch = match.match(/^(?:\d[\d.]*%?\s+)?(.+)$/i);
+      const kwPart = kwMatch ? kwMatch[1] : match;
+      const entry = entries.find(([k]) => k.toLowerCase() === kwPart.toLowerCase());
+      if (!entry) return escapeHtml(match);
+      const [, rule] = entry;
+      const iconHtml = rule.icon
+        ? `<img src="${rule.icon}" class="kw-icon" aria-hidden="true" onerror="this.style.display='none'">`
+        : '';
+      return `<span class="kw" style="color:${rule.color}">${iconHtml}${escapeHtml(match)}</span>`;
+    });
   }
 
-  const pattern = new RegExp(
-    '(?:(?:\\d+(?:\\.\\d+)?%?|\\d+(?:\\.\\d+)?)\\s+)?(?:' +
-    entries.map(([k]) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') +
-    ')',
-    'gi'
-  );
-
-  const html = text.replace(pattern, match => {
-    // Extract keyword part (strip leading number if present)
-    const kwMatch = match.match(/^(?:\d[\d.]*%?\s+)?(.+)$/i);
-    const kwPart = kwMatch ? kwMatch[1] : match;
-    const entry = entries.find(([k]) => k.toLowerCase() === kwPart.toLowerCase());
-    if (!entry) return escapeHtml(match);
-    const [, rule] = entry;
-    const iconHtml = rule.icon
-      ? `<img src="${rule.icon}" class="kw-icon" aria-hidden="true" onerror="this.style.display='none'">`
-      : '';
-    return `<span class="kw" style="color:${rule.color}">${iconHtml}${escapeHtml(match)}</span>`;
-  });
+  // Split on newlines, highlight each line, rejoin with <br>
+  const html = text
+    .split('\n')
+    .map(line => highlightLine(line))
+    .join('<br>');
 
   descEl.innerHTML = html;
 
@@ -395,43 +494,127 @@ function bindEditableSelectAll(el) {
 
 // Attach all DOM event listeners
 function bindEvents() {
+  // ------------------------------------------------------------------
+  // Helper: attach undo (Ctrl/Cmd+Z) to a plain contenteditable field
+  // (title, tag — no keyword highlighting, just innerText)
+  // ------------------------------------------------------------------
+  function bindUndoPlain(el, getStateVal, setStateVal) {
+    const history = new UndoHistory();
+
+    el.addEventListener('focus', () => {
+      history.pushNow(el.innerText, getCaretOffset(el));
+    });
+
+    el.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        history.flush(el.innerText, getCaretOffset(el));
+        const snap = history.undo();
+        if (!snap) return;
+        history._isMutating = true;
+        el.innerText = snap.text;
+        setCaretOffset(el, snap.caret);
+        history._isMutating = false;
+        setStateVal(snap.text);
+        pushState();
+        return;
+      }
+      // Ctrl+A / Cmd+A handled by bindEditableSelectAll
+    });
+
+    el.addEventListener('input', () => {
+      if (history._isMutating) return;
+      history.push(el.innerText, getCaretOffset(el));
+      setStateVal(el.innerText);
+      pushState();
+    });
+
+    el.addEventListener('blur', () => {
+      history.flush(el.innerText, getCaretOffset(el));
+      setStateVal(el.innerText);
+      pushState();
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // Helper: attach undo to the description field (has keyword highlighting)
+  // ------------------------------------------------------------------
+  function bindUndoDesc(el) {
+    const history = new UndoHistory();
+
+    el.addEventListener('focus', () => {
+      history.pushNow(el.innerText, getCaretOffset(el));
+    });
+
+    el.addEventListener('keydown', e => {
+      // Undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        history.flush(el.innerText, getCaretOffset(el));
+        const snap = history.undo();
+        if (!snap) return;
+        history._isMutating = true;
+        state.desc = snap.text;
+        highlightKeywords(el, snap.text, state.config.keywords);
+        setCaretOffset(el, snap.caret);
+        history._isMutating = false;
+        pushState();
+        return;
+      }
+
+      // Enter — insert <br> newline
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // Flush current state before the change so Enter is its own undo point
+        history.flush(el.innerText, getCaretOffset(el));
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        const br = document.createElement('br');
+        range.insertNode(br);
+        range.setStartAfter(br);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        state.desc = el.innerText;
+        highlightKeywords(el, state.desc, state.config.keywords);
+        pushState();
+        // Record the post-Enter state as a new undo point
+        history.pushNow(el.innerText, getCaretOffset(el));
+      }
+    });
+
+    el.addEventListener('input', () => {
+      if (history._isMutating) return;
+      state.desc = el.innerText;
+      highlightKeywords(el, state.desc, state.config.keywords);
+      history.push(el.innerText, getCaretOffset(el));
+      pushState();
+    });
+
+    el.addEventListener('blur', () => {
+      history.flush(el.innerText, getCaretOffset(el));
+      state.desc = el.innerText;
+      highlightKeywords(el, state.desc, state.config.keywords);
+      pushState();
+    });
+  }
+
   // Title editing
   const titleEl = document.getElementById('card-title');
   bindEditableSelectAll(titleEl);
-  titleEl.addEventListener('input', () => {
-    state.title = titleEl.innerText;
-    pushState();
-  });
-  titleEl.addEventListener('blur', () => {
-    state.title = titleEl.innerText;
-    pushState();
-  });
+  bindUndoPlain(titleEl, () => state.title, v => { state.title = v; });
 
   // Tag editing
   const tagEl = document.getElementById('card-tag');
   bindEditableSelectAll(tagEl);
-  tagEl.addEventListener('input', () => {
-    state.tag = tagEl.innerText;
-    pushState();
-  });
-  tagEl.addEventListener('blur', () => {
-    state.tag = tagEl.innerText;
-    pushState();
-  });
+  bindUndoPlain(tagEl, () => state.tag, v => { state.tag = v; });
 
-  // Description editing — highlight live on input with caret preservation
+  // Description editing
   const descEl = document.getElementById('card-desc');
   bindEditableSelectAll(descEl);
-  descEl.addEventListener('input', () => {
-    state.desc = descEl.innerText;
-    highlightKeywords(descEl, state.desc, state.config.keywords);
-    pushState();
-  });
-  descEl.addEventListener('blur', () => {
-    state.desc = descEl.innerText;
-    highlightKeywords(descEl, state.desc, state.config.keywords);
-    pushState();
-  });
+  bindUndoDesc(descEl);
 
   // Export buttons
   document.getElementById('btn-copy-image').addEventListener('click', () => exportPNG('copy-image'));
