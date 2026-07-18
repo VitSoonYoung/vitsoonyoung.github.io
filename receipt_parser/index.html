@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Parse Total Amount</title>
+<style>
+  body{background:#fff;color:#000;font-family:monospace;max-width:600px;margin:40px auto;padding:0 20px}
+  textarea{width:100%;height:220px;background:#fff;color:#000;border:1px solid #000;padding:10px;font-family:monospace;font-size:14px}
+  button{margin-top:10px;background:#000;color:#fff;border:none;padding:10px 20px;cursor:pointer;font-family:monospace}
+  button:hover{background:#333}
+  #result{margin-top:20px;font-size:14px;border-top:1px solid #000;padding-top:10px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+  <h2>Parse Total Amount</h2>
+  <textarea id="input" placeholder="Paste OCR text here..." onkeyup="run()" onchange="run()"></textarea>
+  <br>
+  <div id="result">Total: —</div>
+
+<script>
+class ReceiptParser {
+  constructor(text) {
+    this.rawText = text;
+    this.noDiacritics = this.removeDiacritics(text); // public var, không dấu version
+  }
+
+  removeDiacritics(inputString) {
+    return inputString.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+  }
+
+  static TAG = { FOOD:'food', BEVERAGE:'beverage', FRIED_CHICKEN:'fried_chicken', PIZZA:'pizza', TEA:'tea', COFFEE:'coffee', FAST_FOOD:'fast_food', CONVENIENCE_STORE:'convenience_store', BUBBLE_TEA:'bubble_tea', VIETNAMESE_FOOD:'vietnamese_food', SUPERMARKET:'supermarket', ELECTRONICS:'electronics' };
+
+  static MERCHANTS = {
+    'KFC': { tags: [ReceiptParser.TAG.FRIED_CHICKEN, ReceiptParser.TAG.FAST_FOOD, ReceiptParser.TAG.FOOD] },
+    'Mixue': { tags: [ReceiptParser.TAG.TEA, ReceiptParser.TAG.BUBBLE_TEA, ReceiptParser.TAG.BEVERAGE] },
+    'Mr Good Tea': { tags: [ReceiptParser.TAG.TEA, ReceiptParser.TAG.BUBBLE_TEA, ReceiptParser.TAG.BEVERAGE] },
+    'Highlands Coffee': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'The Coffee House': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Phuc Long': { tags: [ReceiptParser.TAG.TEA, ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Circle K': { tags: [ReceiptParser.TAG.CONVENIENCE_STORE] },
+    'Lotteria': { tags: [ReceiptParser.TAG.FRIED_CHICKEN, ReceiptParser.TAG.FAST_FOOD, ReceiptParser.TAG.FOOD] },
+    'Jollibee': { tags: [ReceiptParser.TAG.FRIED_CHICKEN, ReceiptParser.TAG.FAST_FOOD, ReceiptParser.TAG.FOOD] },
+    'Pizza Hut': { tags: [ReceiptParser.TAG.PIZZA, ReceiptParser.TAG.FOOD] },
+    'Domino\'s': { tags: [ReceiptParser.TAG.PIZZA, ReceiptParser.TAG.FOOD] },
+    'Starbucks': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Gong Cha': { tags: [ReceiptParser.TAG.BUBBLE_TEA, ReceiptParser.TAG.BEVERAGE] },
+    'Bubble Cup': { tags: [ReceiptParser.TAG.BUBBLE_TEA, ReceiptParser.TAG.BEVERAGE] },
+    'ToCoToco': { tags: [ReceiptParser.TAG.BUBBLE_TEA, ReceiptParser.TAG.TEA, ReceiptParser.TAG.BEVERAGE] },
+    'Cheese Coffee': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Cong Caphe': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Pho 24': { tags: [ReceiptParser.TAG.VIETNAMESE_FOOD, ReceiptParser.TAG.FOOD] },
+    'Katinat': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Guta Cafe': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Trung Nguyen': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Passio Coffee': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Bach Hoa Xanh': { tags: [ReceiptParser.TAG.SUPERMARKET] },
+    'Vinmart': { tags: [ReceiptParser.TAG.SUPERMARKET] },
+    'GS25': { tags: [ReceiptParser.TAG.CONVENIENCE_STORE] },
+    'Family Mart': { tags: [ReceiptParser.TAG.CONVENIENCE_STORE] },
+    'Winmart': { tags: [ReceiptParser.TAG.SUPERMARKET] },
+    'Aeon': { tags: [ReceiptParser.TAG.SUPERMARKET] },
+    'Co.opmart': { tags: [ReceiptParser.TAG.SUPERMARKET] },
+    'Bun Cha Ha Noi': { tags: [ReceiptParser.TAG.VIETNAMESE_FOOD, ReceiptParser.TAG.FOOD] },
+    'Pho Thin': { tags: [ReceiptParser.TAG.VIETNAMESE_FOOD, ReceiptParser.TAG.FOOD] },
+    'FPT Shop': { tags: [ReceiptParser.TAG.ELECTRONICS] },
+    'The Gioi Di Dong': { tags: [ReceiptParser.TAG.ELECTRONICS] },
+    'Cafe Amazon': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Milano Coffee': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Napoli Coffee': { tags: [ReceiptParser.TAG.COFFEE, ReceiptParser.TAG.BEVERAGE] },
+    'Chuk Chuk': { tags: [ReceiptParser.TAG.BUBBLE_TEA, ReceiptParser.TAG.BEVERAGE] },
+    'Bobapop': { tags: [ReceiptParser.TAG.BUBBLE_TEA, ReceiptParser.TAG.BEVERAGE] },
+  };
+
+  _findMerchant() {
+    const normalizedText = this.noDiacritics.toLowerCase();
+    for (const merchantName in ReceiptParser.MERCHANTS) {
+      const pattern = this.removeDiacritics(merchantName).toLowerCase().replace(/\s+/g, '\\s*');
+      if (new RegExp(pattern, 'i').test(normalizedText)) return merchantName;
+    }
+    return null;
+  }
+
+  parse_merchant_simple() {
+    return this._findMerchant();
+  }
+
+  parse_tags_simple() {
+    const merchantName = this._findMerchant();
+    return merchantName ? ReceiptParser.MERCHANTS[merchantName].tags : null;
+  }
+
+  _toInt(numberString) {
+    const cleanedNumber = (numberString || '').replace(/[^\d]/g, '');
+    return cleanedNumber.length ? parseInt(cleanedNumber, 10) : null;
+  }
+
+  // Matches: "tong tien 200,000 vnđ" — keyword and amount on same line/segment
+  parse_total_amount_simple() {
+    const normalizedText = this.noDiacritics.replace(/\s+/g, ' ');
+    const keywordPattern = '(?:tong\\s*(?:cong|tien)|thanh\\s*toan|thanh\\s*tien)';
+    const regex = new RegExp(keywordPattern + '\\s*:?\\s*([\\d.,]+)\\s*(?:vnd|d)?\\b', 'gi');
+    let match, lastMatch = null;
+    while ((match = regex.exec(normalizedText)) !== null) lastMatch = match;
+    return lastMatch ? this._toInt(lastMatch[1]) : null;
+  }
+
+  parse_total_amount_loose() {
+    const normalizedText = this.noDiacritics;
+    const keywordPattern = '(?:tong\\s*(?:cong|tien)|thanh\\s*toan|thanh\\s*tien)';
+    const regex = new RegExp(keywordPattern + '[\\s\\S]{0,150}?([\\d][\\d.,]*)\\s*(?:vnd|d)\\b', 'gi');
+    let match, lastMatch = null;
+    while ((match = regex.exec(normalizedText)) !== null) lastMatch = match;
+    return lastMatch ? this._toInt(lastMatch[1]) : null;
+  }
+
+  static SCHEMA = {
+    merchant: { name: 'Merchant', parsers: ['parse_merchant_simple'], formatter: 'format_merchant' },
+    tags: { name: 'Tags', parsers: ['parse_tags_simple'], formatter: 'format_tags' },
+    total_amount: { name: 'Total Amount', parsers: ['parse_total_amount_simple', 'parse_total_amount_loose'], formatter: 'format_total_amount' },
+  };
+
+  format_merchant(value) { return value; }
+  format_tags(value) { return value; }
+  format_total_amount(value) { return value; }
+
+  parse() {
+    const result = {};
+    for (const [fieldKey, fieldConfig] of Object.entries(ReceiptParser.SCHEMA)) {
+      let parsedValue = null;
+      for (const parserName of fieldConfig.parsers) {
+        parsedValue = this[parserName]();
+        if (parsedValue !== null) break;
+      }
+      result[fieldKey] = fieldConfig.formatter ? this[fieldConfig.formatter](parsedValue) : parsedValue;
+    }
+    return JSON.stringify(result);
+  }
+}
+
+function run() {
+  const text = document.getElementById('input').value;
+  const parser = new ReceiptParser(text);
+  document.getElementById('result').textContent = JSON.stringify(JSON.parse(parser.parse()), null, 2);
+}
+</script>
+</body>
+</html>
