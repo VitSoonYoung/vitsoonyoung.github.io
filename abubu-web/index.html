@@ -6,180 +6,126 @@
   <meta name="theme-color" content="#180968">
   <meta name="description" content="Christmas Around — a festive adventure from Abubu Dance.">
   <title>Christmas Around — Abubu Dance</title>
-  <link rel="preload" href="assets/ca_logo.png" as="image">
-  <link rel="preload" href="assets/sleigh2.png" as="image">
-  <style>
-    @font-face { font-family: Coiny; src: url("assets/Coiny.ttf") format("truetype"); font-display: swap; }
-    :root { color-scheme: dark; background: #180968; }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; }
-    body { min-height: 100vh; overflow-x: hidden; background: #180968; }
-    .page { min-height: 160vh; overflow: hidden; }
-    .scene-shell { position: relative; width: 100%; overflow: hidden; background: #180968; opacity: 0; animation: reveal 1.15s ease-out forwards; }
-    .artboard { position: absolute; top: 0; left: 50%; width: 1232px; height: 817px; overflow: hidden; background: #180968; transform-origin: top center; transform: translateX(-50%) scale(var(--scale, 1)); isolation: isolate; }
-    .layer, .sprite { position: absolute; }
-    .layer, .sprite { pointer-events: none; }
-    .layer img, .sprite img { display: block; width: 100%; height: 100%; }
-    .parallax { transform: translate3d(var(--move-x, 0px), var(--move-y, 0px), 0); will-change: transform; }
-    .rotated { transform: rotate(var(--angle)); transform-origin: center; }
-    .rotated.parallax { transform: translate3d(var(--move-x, 0px), var(--move-y, 0px), 0) rotate(var(--angle)); }
-    .flight { position: absolute; inset: 0; pointer-events: none; transform: translate3d(var(--flight-x, 0px), var(--flight-y, 0px), 0); will-change: transform; }
-    .cloud-high { left: 0; top: 0; width: 1232px; height: 576px; }
-    .mobile-background { display: none; left: 0; top: -24px; width: 1232px; height: 842px; }
-    .ellipse-72 { left: 321.98px; top: 49.995px; width: 1198px; height: 477px; --angle: 27.01deg; }
-    .ellipse-73 { left: -320.015px; top: -164.495px; width: 1198px; height: 477px; --angle: 15.51deg; }
-    .cloud-far { left: 0; top: 0; width: 1232px; height: 576px; }
-    .planet { left: -103.15px; top: 149.54px; width: 1353px; height: 632px; --angle: -3.05deg; opacity: .79; }
-    .snow-2, .snow-3 { left: -276px; top: 0; width: 1511px; height: 706px; }
-    .snow-3 { opacity: .47; }
-    .snow-detail { left: 515.88px; top: -64.1px; width: 367.895px; height: 171.951px; --angle: .59deg; opacity: .47; }
-    .ellipse-71 { left: 150px; top: -334px; width: 1223px; height: 558px; }
-    .moon-light { left: 1012px; top: -131px; width: 283px; height: 284px; }
-    .moon { left: -588px; top: -160px; width: 1979px; height: 925px; }
-    .sleigh { left: -30.474px; top: 35.951px; width: 1179.68px; height: 668.355px; --angle: -1.86deg; }
-    .sleigh-shadow { left: -160.816px; top: 360.765px; width: 524px; height: 413.434px; --angle: 1.62deg; }
-    .sleigh-detail { left: 763.72px; top: 192px; width: 8.598px; height: 10px; opacity: .93; }
-    .sleigh-detail img { -webkit-mask: url("assets/sleigh3.svg") center / 100% 100% no-repeat; mask: url("assets/sleigh3.svg") center / 100% 100% no-repeat; }
-    .santa { left: 1px; top: 267px; width: 937px; height: 438px; }
-    .elf-hammer { left: -19px; top: 114px; width: 1392px; height: 651px; }
-    .elf-guitar { left: -23px; top: 183px; width: 1119px; height: 523px; }
-    .fade-slope { left: -48px; top: 404px; width: 1320px; height: 345px; transform: rotate(-5.34deg); background: linear-gradient(180deg, rgba(24,9,104,0) 0%, rgba(24,9,104,.34) 42%, rgba(24,9,104,.88) 78%, #180968 100%); }
-    .fade-bottom { left: 0; top: 625px; width: 1235px; height: 192px; }
-    .gift { left: 412px; top: 477px; width: 479px; height: 228px; transform: translate3d(var(--foreground-x, 0px), var(--foreground-y, 0px), 0); will-change: transform; }
-    .gift img, .elf-front img { will-change: transform; }
-    .gift-red img { clip-path: inset(0 38% 0 0); transform-origin: 31% 58%; animation: gift-float-red 4.8s ease-in-out -1.2s infinite; }
-    .gift-green img { clip-path: inset(0 0 0 59%); transform-origin: 78% 58%; animation: gift-float-green 5.4s ease-in-out -3.3s infinite; }
-    .elf-front { left: 16.177px; top: 368.239px; width: 703px; height: 329px; --angle: -6.41deg; transform: translate3d(var(--foreground-x, 0px), var(--foreground-y, 0px), 0) rotate(var(--angle)); will-change: transform; }
-    .elf-front img { animation: elf-float 5.1s ease-in-out -.9s infinite; }
-    .logo-shadow { left: 495.108px; top: 286.025px; width: 301.982px; height: 266.508px; --angle: 2.95deg; }
-    .game-logo { left: 173.546px; top: 156.808px; width: 1015.096px; height: 474.803px; --angle: 2.95deg; }
-    .logo-motion { position: absolute; inset: 0; pointer-events: none; transform: translate3d(var(--logo-x, 0px), var(--logo-y, 0px), 0); animation: logo-breathe 5s ease-in-out infinite; will-change: transform; }
-    .studio-logo { position: absolute; left: 32px; top: 27px; width: 170px; height: 88px; z-index: 30; pointer-events: none; }
-    .studio-logo__top { height: 53px; display: flex; align-items: flex-start; gap: 0; font: 54px/.9 Coiny, sans-serif; letter-spacing: -5px; white-space: nowrap; }
-    .studio-logo__top span { display: block; -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .studio-logo__top span:nth-child(1) { transform: rotate(1deg); background-image: linear-gradient(#ffffdc, #a8fc42); }
-    .studio-logo__top span:nth-child(2) { transform: rotate(13deg); background-image: linear-gradient(#fff4dc, #ff4f52); }
-    .studio-logo__top span:nth-child(3) { transform: rotate(-7deg); background-image: linear-gradient(#ffeed2, #ffe356); }
-    .studio-logo__top span:nth-child(4) { transform: rotate(9deg); background-image: linear-gradient(#e4f9ff, #1ef9ea); }
-    .studio-logo__top span:nth-child(5) { transform: rotate(-4deg); background-image: linear-gradient(#ffcee3, #ff2e5f); }
-    .studio-logo__dance { display: block; position: absolute; left: 5px; top: 53px; width: 162.786px; height: 33.255px; opacity: .9; }
-    @keyframes reveal { from { opacity: 0; filter: brightness(.72); } to { opacity: 1; filter: brightness(1); } }
-    @keyframes elf-float { 0%, 100% { transform: translate3d(0, 3px, 0) rotate(-.7deg); } 50% { transform: translate3d(4px, -12px, 0) rotate(.8deg); } }
-    @keyframes gift-float-red { 0%, 100% { transform: translate3d(0, 3px, 0) rotate(-.8deg); } 50% { transform: translate3d(2px, -13px, 0) rotate(1.4deg); } }
-    @keyframes gift-float-green { 0%, 100% { transform: translate3d(0, -2px, 0) rotate(.7deg); } 50% { transform: translate3d(-3px, -16px, 0) rotate(-1.3deg); } }
-    @keyframes logo-breathe { 0%, 100% { transform: translate3d(var(--logo-x, 0px), var(--logo-y, 0px), 0) rotate(-.25deg); } 50% { transform: translate3d(var(--logo-x, 0px), calc(var(--logo-y, 0px) - 5px), 0) rotate(.35deg); } }
-    @media (max-width: 600px) {
-      .artboard { left: 0; height: 1060px; transform-origin: top left; transform: scale(var(--scale, 1)); }
-      .artboard > .parallax:not(.mobile-background), .flight { display: none; }
-      .mobile-background { display: block; }
-      .fade-slope { left: -40px; top: 300px; width: 830px; height: 650px; transform: none; background: linear-gradient(180deg, rgba(24,9,104,0) 0%, rgba(24,9,104,.18) 26%, rgba(24,9,104,.7) 55%, #180968 82%); }
-      .fade-bottom { display: none; }
-      .game-logo { left: -295px; top: 400px; }
-      .logo-shadow { left: 26.562px; top: 529.217px; }
-      .elf-front { left: -65px; top: 660px; }
-      .gift { left: 230px; top: 760px; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .scene-shell { opacity: 1; animation: none; }
-      .logo-motion, .gift img, .elf-front img { animation: none; }
-      .parallax { transform: none; }
-      .rotated.parallax { transform: rotate(var(--angle)); }
-      .flight { transform: none; }
-      .gift { transform: none; }
-      .elf-front { transform: rotate(var(--angle)); }
-    }
-  </style>
+  <link rel="preload" href="assets/CABackground.webp" as="image">
+  <link rel="preload" href="assets/CALogo.png" as="image">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="page" aria-label="Christmas Around game landing page">
     <div class="scene-shell" id="scene-shell">
       <div class="artboard" id="artboard">
-        <div class="layer mobile-background parallax" data-depth="5" aria-hidden="true"><img src="assets/ca_background_mobile.png" alt=""></div>
-        <div class="layer cloud-high parallax" data-depth="9" aria-hidden="true"><img src="assets/cloud_high.png" alt=""></div>
-        <div class="layer ellipse-72 rotated parallax" data-depth="9" aria-hidden="true"><img src="assets/ellipse72.svg" alt=""></div>
-        <div class="layer ellipse-73 rotated parallax" data-depth="9" aria-hidden="true"><img src="assets/ellipse73.svg" alt=""></div>
-        <div class="layer cloud-far parallax" data-depth="7" aria-hidden="true"><img src="assets/cloud_far.png" alt=""></div>
-        <div class="layer planet rotated parallax" data-depth="6" aria-hidden="true"><img src="assets/planet.png" alt=""></div>
-        <div class="layer snow-2 parallax" data-depth="3" aria-hidden="true"><img src="assets/snow2.png" alt=""></div>
-        <div class="layer snow-3 parallax" data-depth="3" aria-hidden="true"><img src="assets/snow3.png" alt=""></div>
-        <div class="layer snow-detail rotated parallax" data-depth="3" aria-hidden="true"><img src="assets/snow3.png" alt=""></div>
-        <div class="layer ellipse-71 parallax" data-depth="4" aria-hidden="true"><img src="assets/ellipse71.svg" alt=""></div>
-        <div class="layer moon-light parallax" data-depth="3" aria-hidden="true"><img src="assets/moon_light.svg" alt=""></div>
-        <div class="layer moon parallax" data-depth="3" aria-hidden="true"><img src="assets/moon.png" alt=""></div>
-        <div class="flight" id="flight" aria-hidden="true">
-          <div class="layer sleigh-shadow rotated"><img src="assets/sleigh_shadow.svg" alt=""></div>
-          <div class="layer sleigh rotated"><img src="assets/sleigh2.png" alt=""></div>
-          <div class="layer sleigh-detail"><img src="assets/sleigh4.png" alt=""></div>
-          <div class="layer santa"><img src="assets/santa.png" alt=""></div>
-          <div class="layer elf-hammer"><img src="assets/elf_hammer.png" alt=""></div>
-          <div class="layer elf-guitar"><img src="assets/elf_guitar.png" alt=""></div>
-        </div>
-        <div class="layer fade-slope" aria-hidden="true"></div>
-        <div class="layer fade-bottom" aria-hidden="true"><img src="assets/rectangle370.svg" alt=""></div>
-        <div class="sprite gift gift-red" aria-hidden="true"><img src="assets/ca_gift.png" alt=""></div>
-        <div class="sprite gift gift-green" aria-hidden="true"><img src="assets/ca_gift.png" alt=""></div>
-        <div class="sprite elf-front" aria-hidden="true"><img src="assets/ca_elf_gift.png" alt=""></div>
-        <div class="logo-motion" id="logo-motion" aria-hidden="true">
-          <div class="layer logo-shadow rotated"><img src="assets/logo_shadow.svg" alt=""></div>
-          <div class="layer game-logo rotated"><img src="assets/ca_logo.png" alt=""></div>
-        </div>
-        <div class="studio-logo" role="img" aria-label="Abubu Dance">
-          <div class="studio-logo__top" aria-hidden="true"><span>A</span><span>B</span><span>U</span><span>B</span><span>U</span></div>
-          <img class="studio-logo__dance" src="assets/abubu_dance.svg" alt="">
-        </div>
+        <img class="scene-background" src="assets/CABackground.webp" alt="">
+        <div class="scene-fade" aria-hidden="true"></div>
+        <img class="gift" src="assets/CAGift.png" alt="">
+        <img class="elf-front" src="assets/CAElfGift.png" alt="">
+        <img class="game-logo" src="assets/CALogo.png" alt="">
+        <img class="studio-logo" src="assets/AbubuDanceLogo.png" alt="Abubu Dance">
+      </div>
+      <div class="hero-actions" aria-label="Game links">
+        <button class="hero-button hero-button--wishlist" type="button"><span aria-hidden="true">◉</span> Wishlist</button>
+        <button class="hero-button hero-button--presskit" type="button"><span aria-hidden="true">▰</span> Presskit</button>
       </div>
     </div>
+
+    <section class="showcase" aria-label="Abubu Dance games and studio">
+      <section class="partners" aria-labelledby="partners-title">
+        <h2 id="partners-title" class="eyebrow">Our partners</h2>
+        <div class="partner-list">
+          <div class="partner-placeholder">Steam</div>
+          <div class="partner-placeholder">itch.io</div>
+          <div class="partner-placeholder">Epic Games</div>
+          <div class="partner-placeholder">Unity</div>
+        </div>
+      </section>
+
+      <section class="games" aria-labelledby="games-title">
+        <h2 id="games-title" class="section-title">Our Games</h2>
+        <div class="game-carousel" id="game-carousel" role="region" aria-label="Game poster carousel. Swipe or use the arrow keys to browse games" tabindex="0">
+          <div class="carousel-track"></div>
+          <span class="visually-hidden" id="carousel-status" aria-live="polite"></span>
+        </div>
+        <div class="game-details">
+          <div class="game-tags"></div>
+          <p class="game-description"></p>
+        </div>
+      </section>
+
+      <section class="about" aria-labelledby="about-title">
+        <div class="about-visual">
+          <h2 id="about-title" class="section-title">About Us</h2>
+          <div class="photo-placeholder" aria-label="Studio photo placeholder">
+            <span>Studio photo placeholder</span>
+          </div>
+          <div class="note-placeholder">Been making weird silly games since 2024</div>
+        </div>
+        <div class="about-copy">
+          <p>We’re a small team making weird, silly games that bring people together.</p>
+          <p>We love creating playful worlds, cozy chaos, and unforgettable moments with friends.</p>
+          <p>We would love to hear from you if you’re:</p>
+          <ul>
+            <li>Investors or Publishers</li>
+            <li>Indie Developers</li>
+            <li>Streamers or Presses</li>
+            <li>Curious cats</li>
+          </ul>
+          <a class="contact-button" href="mailto:hi@abubudance.com"><span aria-hidden="true">✉</span> hi@abubudance.com</a>
+        </div>
+      </section>
+
+      <section class="values" aria-labelledby="values-title">
+        <h2 id="values-title" class="section-title"><span class="title-spark title-spark--gold">〽</span> What we love and yuck! <span class="title-spark title-spark--gold">〽</span></h2>
+        <div class="value-list">
+          <article class="value-item"><div class="icon-placeholder">✦</div><p>Party, incremental,<br>story rich or just<br>silly games</p></article>
+          <article class="value-item"><div class="icon-placeholder">✣</div><p>Party, incremental,<br>story rich or just<br>silly games</p></article>
+          <article class="value-item"><div class="icon-placeholder">☻</div><p>Party, incremental,<br>story rich or just<br>silly games</p></article>
+          <article class="value-item"><div class="icon-placeholder">♥</div><p>Party, incremental,<br>story rich or just<br>silly games</p></article>
+        </div>
+      </section>
+    </section>
   </main>
+  <canvas class="cursor-trail" id="cursor-trail" aria-hidden="true"></canvas>
+  <img class="custom-cursor" id="custom-cursor" src="assets/cursor.png" alt="" aria-hidden="true">
   <script>
-    (() => {
-      const shell = document.getElementById('scene-shell');
-      const board = document.getElementById('artboard');
-      const logo = document.getElementById('logo-motion');
-      const flight = document.getElementById('flight');
-      const layers = [...board.querySelectorAll('[data-depth]')];
-      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
-      const position = { x: 0, y: 0, scroll: 0, targetX: 0, targetY: 0, targetScroll: 0 };
-      const resize = () => {
-        const width = document.documentElement.clientWidth;
-        const mobile = window.innerWidth <= 600;
-        const scale = width / (mobile ? 750 : 1232);
-        board.style.setProperty('--scale', scale);
-        shell.style.height = `${(mobile ? 1060 : 817) * scale}px`;
-      };
-      resize();
-      addEventListener('resize', resize, { passive: true });
-      addEventListener('pointermove', event => {
-        if (reduceMotion.matches) return;
-        position.targetX = Math.max(-1, Math.min(1, (event.clientX / window.innerWidth - .5) * 2));
-        position.targetY = Math.max(-1, Math.min(1, (event.clientY / window.innerHeight - .5) * 2));
-      }, { passive: true });
-      addEventListener('pointerout', event => {
-        if (!event.relatedTarget) { position.targetX = 0; position.targetY = 0; }
-      });
-      const onScroll = () => { position.targetScroll = Math.min(window.scrollY, 700); };
-      addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-      function tick() {
-        position.x += (position.targetX - position.x) * .065;
-        position.y += (position.targetY - position.y) * .065;
-        position.scroll += (position.targetScroll - position.scroll) * .075;
-        if (!reduceMotion.matches) {
-          for (const layer of layers) {
-            const depth = Number(layer.dataset.depth);
-            layer.style.setProperty('--move-x', `${(-position.x * depth).toFixed(2)}px`);
-            layer.style.setProperty('--move-y', `${(-position.y * depth - position.scroll * depth / 60).toFixed(2)}px`);
-          }
-          flight.style.setProperty('--flight-x', `${(position.x * 5).toFixed(2)}px`);
-          flight.style.setProperty('--flight-y', `${(position.y * 3 - position.scroll * .06).toFixed(2)}px`);
-          board.style.setProperty('--foreground-x', `${(position.x * 3).toFixed(2)}px`);
-          board.style.setProperty('--foreground-y', `${(position.y * 2 - position.scroll * .035).toFixed(2)}px`);
-          logo.style.setProperty('--logo-x', `${(position.x * 3.5).toFixed(2)}px`);
-          logo.style.setProperty('--logo-y', `${(position.y * 2.5 - position.scroll * .045).toFixed(2)}px`);
-        }
-        requestAnimationFrame(tick);
+    window.carouselGames = [
+      {
+        name: 'Christmasing Around',
+        title: 'Christmasing Around',
+        image: 'assets/CALogo.png',
+        backgroundImage: 'assets/CABackground.webp',
+        tags: ['Party', 'Co op', 'Silly'],
+        description: 'Christmasing Around is a chaotic, co op party game about making Christmas as messy and magical as possible. Play with your friends, cause some holiday havoc, and spread joy... or at least try to.'
+      },
+      {
+        name: 'Upcoming game one',
+        title: 'Coming Soon',
+        image: '',
+        tags: ['Coming soon'],
+        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.'
+      },
+      {
+        name: 'Upcoming game two',
+        title: 'Coming Soon',
+        image: '',
+        tags: ['Coming soon'],
+        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.'
+      },
+      {
+        name: 'Upcoming game three',
+        title: 'Coming Soon',
+        image: '',
+        tags: ['Coming soon'],
+        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.'
+      },
+      {
+        name: 'Upcoming game four',
+        title: 'Coming Soon',
+        image: '',
+        tags: ['Coming soon'],
+        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.'
       }
-      requestAnimationFrame(tick);
-    })();
+    ];
   </script>
+  <script src="script.js" defer></script>
+
 </body>
 </html>

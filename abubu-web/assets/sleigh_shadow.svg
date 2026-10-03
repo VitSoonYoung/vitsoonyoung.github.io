@@ -1,9 +1,0 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="524" height="413.434" viewBox="0 0 524 413.434" fill="none" xmlns="http://www.w3.org/2000/svg">
-<ellipse id="sleigh_shadow" cx="262" cy="206.717" rx="262" ry="206.717" fill="url(#paint0_radial_0_19)" fill-opacity="0.54"/>
-<defs>
-<radialGradient id="paint0_radial_0_19" cx="0" cy="0" r="1" gradientTransform="matrix(-17.3614 194.723 -246.799 -17.5874 279.361 218.711)" gradientUnits="userSpaceOnUse">
-<stop offset="0.317308" stop-color="#4E0000" stop-opacity="0.68"/>
-<stop offset="1" stop-color="#737373" stop-opacity="0.21"/>
-</radialGradient>
-</defs>
-</svg>
