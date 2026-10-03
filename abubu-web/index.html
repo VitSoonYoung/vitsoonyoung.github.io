@@ -14,15 +14,16 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; }
     body { min-height: 100vh; overflow-x: hidden; background: #180968; }
-    .page { min-height: 100vh; overflow: hidden; }
+    .page { min-height: 160vh; overflow: hidden; }
     .scene-shell { position: relative; width: 100%; overflow: hidden; opacity: 0; animation: reveal 1.15s ease-out forwards; }
     .artboard { position: absolute; top: 0; left: 50%; width: 1232px; height: 817px; overflow: hidden; transform-origin: top center; transform: translateX(-50%) scale(var(--scale, 1)); isolation: isolate; }
-    .layer, .sprite, .hit { position: absolute; }
+    .layer, .sprite { position: absolute; }
     .layer, .sprite { pointer-events: none; }
     .layer img, .sprite img { display: block; width: 100%; height: 100%; }
     .parallax { transform: translate3d(var(--move-x, 0px), var(--move-y, 0px), 0); will-change: transform; }
     .rotated { transform: rotate(var(--angle)); transform-origin: center; }
     .rotated.parallax { transform: translate3d(var(--move-x, 0px), var(--move-y, 0px), 0) rotate(var(--angle)); }
+    .flight { position: absolute; inset: 0; pointer-events: none; transform: translate3d(var(--flight-x, 0px), var(--flight-y, 0px), 0); will-change: transform; }
     .cloud-high { left: 0; top: 0; width: 1232px; height: 576px; }
     .ellipse-72 { left: 321.98px; top: 49.995px; width: 1198px; height: 477px; --angle: 27.01deg; }
     .ellipse-73 { left: -320.015px; top: -164.495px; width: 1198px; height: 477px; --angle: 15.51deg; }
@@ -41,14 +42,13 @@
     .santa { left: 1px; top: 267px; width: 937px; height: 438px; }
     .elf-hammer { left: -19px; top: 114px; width: 1392px; height: 651px; }
     .elf-guitar { left: -23px; top: 183px; width: 1119px; height: 523px; }
-    .sprite.is-floating { animation: hop .7s ease-in-out infinite alternate; }
-    .sprite.rotated.is-floating { animation-name: hop-rotated; }
     .fade-slope { left: -48px; top: 404px; width: 1320px; height: 345px; transform: rotate(-5.34deg); background: linear-gradient(180deg, rgba(24,9,104,0) 0%, rgba(24,9,104,.34) 42%, rgba(24,9,104,.88) 78%, #180968 100%); }
     .fade-bottom { left: 0; top: 625px; width: 1235px; height: 192px; }
-    .gift { left: 412px; top: 477px; width: 479px; height: 228px; }
-    .gift-red img { clip-path: inset(0 38% 0 0); }
-    .gift-green img { clip-path: inset(0 0 0 59%); }
-    .elf-front { left: 16.177px; top: 368.239px; width: 703px; height: 329px; --angle: -6.41deg; }
+    .gift { left: 412px; top: 477px; width: 479px; height: 228px; transform: translate3d(var(--foreground-x, 0px), var(--foreground-y, 0px), 0); will-change: transform; }
+    .gift-red img { clip-path: inset(0 38% 0 0); animation: gift-float 5.2s ease-in-out infinite; }
+    .gift-green img { clip-path: inset(0 0 0 59%); animation: gift-float 4.7s ease-in-out -2.1s infinite; }
+    .elf-front { left: 16.177px; top: 368.239px; width: 703px; height: 329px; --angle: -6.41deg; transform: translate3d(var(--foreground-x, 0px), var(--foreground-y, 0px), 0) rotate(var(--angle)); will-change: transform; }
+    .elf-front img { animation: elf-float 5.8s ease-in-out infinite; }
     .logo-shadow { left: 495.108px; top: 286.025px; width: 301.982px; height: 266.508px; --angle: 2.95deg; }
     .game-logo { left: 173.546px; top: 156.808px; width: 1015.096px; height: 474.803px; --angle: 2.95deg; }
     .logo-motion { position: absolute; inset: 0; pointer-events: none; transform: translate3d(var(--logo-x, 0px), var(--logo-y, 0px), 0); animation: logo-breathe 5s ease-in-out infinite; will-change: transform; }
@@ -61,19 +61,28 @@
     .studio-logo__top span:nth-child(4) { transform: rotate(9deg); background-image: linear-gradient(#e4f9ff, #1ef9ea); }
     .studio-logo__top span:nth-child(5) { transform: rotate(-4deg); background-image: linear-gradient(#ffcee3, #ff2e5f); }
     .studio-logo__dance { display: block; position: absolute; left: 5px; top: 53px; width: 162.786px; height: 33.255px; opacity: .9; }
-    .hit { z-index: 40; background: transparent; cursor: pointer; outline: none; }
-    .hit:focus-visible { outline: 3px solid #f6e790; outline-offset: 5px; border-radius: 32px; }
-    .hit-hammer { left: 70px; top: 135px; width: 315px; height: 160px; transform: rotate(-10deg); border-radius: 45%; }
-    .hit-guitar { left: 0; top: 238px; width: 315px; height: 255px; transform: rotate(-9deg); border-radius: 45%; }
-    .hit-front { left: 105px; top: 400px; width: 370px; height: 265px; transform: rotate(-8deg); border-radius: 45%; }
-    .hit-red { left: 442px; top: 486px; width: 260px; height: 202px; transform: rotate(7deg); border-radius: 40%; }
-    .hit-green { left: 713px; top: 544px; width: 171px; height: 140px; transform: rotate(-8deg); border-radius: 40%; }
     @keyframes reveal { from { opacity: 0; filter: brightness(.72); } to { opacity: 1; filter: brightness(1); } }
-    @keyframes hop { from { transform: translateY(0); } to { transform: translateY(-14px); } }
-    @keyframes hop-rotated { from { transform: translateY(0) rotate(var(--angle)); } to { transform: translateY(-14px) rotate(var(--angle)); } }
+    @keyframes elf-float { 0%, 100% { transform: translateY(0) rotate(-.3deg); } 50% { transform: translateY(-6px) rotate(.4deg); } }
+    @keyframes gift-float { 0%, 100% { transform: translateY(2px); } 50% { transform: translateY(-6px); } }
     @keyframes logo-breathe { 0%, 100% { transform: translate3d(var(--logo-x, 0px), var(--logo-y, 0px), 0) rotate(-.25deg); } 50% { transform: translate3d(var(--logo-x, 0px), calc(var(--logo-y, 0px) - 5px), 0) rotate(.35deg); } }
-    @media (max-width: 650px) { .artboard { left: 46%; } }
-    @media (prefers-reduced-motion: reduce) { .scene-shell { opacity: 1; animation: none; } .logo-motion, .sprite.is-floating { animation: none; } .parallax { transform: none; } }
+    @media (max-width: 600px) {
+      .artboard { left: 0; height: 1060px; transform-origin: top left; transform: scale(var(--scale, 1)); }
+      .moon { left: -950px; }
+      .moon-light { left: 650px; }
+      .game-logo { left: -295px; top: 400px; }
+      .logo-shadow { left: 26.562px; top: 529.217px; }
+      .elf-front { left: -65px; top: 660px; }
+      .gift { left: 230px; top: 760px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scene-shell { opacity: 1; animation: none; }
+      .logo-motion, .gift img, .elf-front img { animation: none; }
+      .parallax { transform: none; }
+      .rotated.parallax { transform: rotate(var(--angle)); }
+      .flight { transform: none; }
+      .gift { transform: none; }
+      .elf-front { transform: rotate(var(--angle)); }
+    }
   </style>
 </head>
 <body>
@@ -91,17 +100,19 @@
         <div class="layer ellipse-71 parallax" data-depth="4" aria-hidden="true"><img src="assets/ellipse71.svg" alt=""></div>
         <div class="layer moon-light parallax" data-depth="3" aria-hidden="true"><img src="assets/moon_light.svg" alt=""></div>
         <div class="layer moon parallax" data-depth="3" aria-hidden="true"><img src="assets/moon.png" alt=""></div>
-        <div class="layer sleigh-shadow rotated" aria-hidden="true"><img src="assets/sleigh_shadow.svg" alt=""></div>
-        <div class="layer sleigh rotated" aria-hidden="true"><img src="assets/sleigh2.png" alt=""></div>
-        <div class="layer sleigh-detail" aria-hidden="true"><img src="assets/sleigh4.png" alt=""></div>
-        <div class="layer santa" aria-hidden="true"><img src="assets/santa.png" alt=""></div>
-        <div class="sprite elf-hammer" id="elf-hammer" aria-hidden="true"><img src="assets/elf_hammer.png" alt=""></div>
-        <div class="sprite elf-guitar" id="elf-guitar" aria-hidden="true"><img src="assets/elf_guitar.png" alt=""></div>
+        <div class="flight" id="flight" aria-hidden="true">
+          <div class="layer sleigh-shadow rotated"><img src="assets/sleigh_shadow.svg" alt=""></div>
+          <div class="layer sleigh rotated"><img src="assets/sleigh2.png" alt=""></div>
+          <div class="layer sleigh-detail"><img src="assets/sleigh4.png" alt=""></div>
+          <div class="layer santa"><img src="assets/santa.png" alt=""></div>
+          <div class="layer elf-hammer"><img src="assets/elf_hammer.png" alt=""></div>
+          <div class="layer elf-guitar"><img src="assets/elf_guitar.png" alt=""></div>
+        </div>
         <div class="layer fade-slope" aria-hidden="true"></div>
         <div class="layer fade-bottom" aria-hidden="true"><img src="assets/rectangle370.svg" alt=""></div>
-        <div class="sprite gift gift-red" id="gift-red" aria-hidden="true"><img src="assets/ca_gift.png" alt=""></div>
-        <div class="sprite gift gift-green" id="gift-green" aria-hidden="true"><img src="assets/ca_gift.png" alt=""></div>
-        <div class="sprite elf-front rotated" id="elf-front" aria-hidden="true"><img src="assets/ca_elf_gift.png" alt=""></div>
+        <div class="sprite gift gift-red" aria-hidden="true"><img src="assets/ca_gift.png" alt=""></div>
+        <div class="sprite gift gift-green" aria-hidden="true"><img src="assets/ca_gift.png" alt=""></div>
+        <div class="sprite elf-front" aria-hidden="true"><img src="assets/ca_elf_gift.png" alt=""></div>
         <div class="logo-motion" id="logo-motion" aria-hidden="true">
           <div class="layer logo-shadow rotated"><img src="assets/logo_shadow.svg" alt=""></div>
           <div class="layer game-logo rotated"><img src="assets/ca_logo.png" alt=""></div>
@@ -110,11 +121,6 @@
           <div class="studio-logo__top" aria-hidden="true"><span>A</span><span>B</span><span>U</span><span>B</span><span>U</span></div>
           <img class="studio-logo__dance" src="assets/abubu_dance.svg" alt="">
         </div>
-        <div class="hit hit-hammer" tabindex="0" role="img" aria-label="Hover to see the hammer elf float" data-float="elf-hammer"></div>
-        <div class="hit hit-guitar" tabindex="0" role="img" aria-label="Hover to see the guitar elf float" data-float="elf-guitar"></div>
-        <div class="hit hit-front" tabindex="0" role="img" aria-label="Hover to see the elf float" data-float="elf-front"></div>
-        <div class="hit hit-red" tabindex="0" role="img" aria-label="Hover to see the red present float" data-float="gift-red"></div>
-        <div class="hit hit-green" tabindex="0" role="img" aria-label="Hover to see the green present float" data-float="gift-green"></div>
       </div>
     </div>
   </main>
@@ -123,47 +129,50 @@
       const shell = document.getElementById('scene-shell');
       const board = document.getElementById('artboard');
       const logo = document.getElementById('logo-motion');
+      const flight = document.getElementById('flight');
       const layers = [...board.querySelectorAll('[data-depth]')];
       const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
-      const position = { x: 0, y: 0, targetX: 0, targetY: 0 };
+      const position = { x: 0, y: 0, scroll: 0, targetX: 0, targetY: 0, targetScroll: 0 };
       const resize = () => {
-        const scale = Math.max(window.innerWidth / 1232, window.innerWidth < 650 ? 0.74 : 0);
+        const width = document.documentElement.clientWidth;
+        const mobile = window.innerWidth <= 600;
+        const scale = width / (mobile ? 750 : 1232);
         board.style.setProperty('--scale', scale);
-        shell.style.height = `${817 * scale}px`;
+        shell.style.height = `${(mobile ? 1060 : 817) * scale}px`;
       };
       resize();
       addEventListener('resize', resize, { passive: true });
-      board.addEventListener('pointermove', event => {
+      addEventListener('pointermove', event => {
         if (reduceMotion.matches) return;
-        const rect = board.getBoundingClientRect();
-        position.targetX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - .5) * 2));
-        position.targetY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - .5) * 2));
+        position.targetX = Math.max(-1, Math.min(1, (event.clientX / window.innerWidth - .5) * 2));
+        position.targetY = Math.max(-1, Math.min(1, (event.clientY / window.innerHeight - .5) * 2));
       }, { passive: true });
-      board.addEventListener('pointerleave', () => { position.targetX = 0; position.targetY = 0; });
+      addEventListener('pointerout', event => {
+        if (!event.relatedTarget) { position.targetX = 0; position.targetY = 0; }
+      });
+      const onScroll = () => { position.targetScroll = Math.min(window.scrollY, 700); };
+      addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
       function tick() {
         position.x += (position.targetX - position.x) * .065;
         position.y += (position.targetY - position.y) * .065;
+        position.scroll += (position.targetScroll - position.scroll) * .075;
         if (!reduceMotion.matches) {
           for (const layer of layers) {
             const depth = Number(layer.dataset.depth);
             layer.style.setProperty('--move-x', `${(-position.x * depth).toFixed(2)}px`);
-            layer.style.setProperty('--move-y', `${(-position.y * depth).toFixed(2)}px`);
+            layer.style.setProperty('--move-y', `${(-position.y * depth - position.scroll * depth / 60).toFixed(2)}px`);
           }
+          flight.style.setProperty('--flight-x', `${(position.x * 5).toFixed(2)}px`);
+          flight.style.setProperty('--flight-y', `${(position.y * 3 - position.scroll * .06).toFixed(2)}px`);
+          board.style.setProperty('--foreground-x', `${(position.x * 3).toFixed(2)}px`);
+          board.style.setProperty('--foreground-y', `${(position.y * 2 - position.scroll * .035).toFixed(2)}px`);
           logo.style.setProperty('--logo-x', `${(position.x * 3.5).toFixed(2)}px`);
-          logo.style.setProperty('--logo-y', `${(position.y * 2.5).toFixed(2)}px`);
+          logo.style.setProperty('--logo-y', `${(position.y * 2.5 - position.scroll * .045).toFixed(2)}px`);
         }
         requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
-      for (const hit of board.querySelectorAll('[data-float]')) {
-        const target = document.getElementById(hit.dataset.float);
-        const start = () => target.classList.add('is-floating');
-        const stop = () => target.classList.remove('is-floating');
-        hit.addEventListener('pointerenter', start);
-        hit.addEventListener('pointerleave', stop);
-        hit.addEventListener('focus', start);
-        hit.addEventListener('blur', stop);
-      }
     })();
   </script>
 </body>
