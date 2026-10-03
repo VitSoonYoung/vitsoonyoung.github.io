@@ -46,10 +46,11 @@
     .fade-slope { left: -48px; top: 404px; width: 1320px; height: 345px; transform: rotate(-5.34deg); background: linear-gradient(180deg, rgba(24,9,104,0) 0%, rgba(24,9,104,.34) 42%, rgba(24,9,104,.88) 78%, #180968 100%); }
     .fade-bottom { left: 0; top: 625px; width: 1235px; height: 192px; }
     .gift { left: 412px; top: 477px; width: 479px; height: 228px; transform: translate3d(var(--foreground-x, 0px), var(--foreground-y, 0px), 0); will-change: transform; }
-    .gift-red img { clip-path: inset(0 38% 0 0); animation: gift-float 5.2s ease-in-out infinite; }
-    .gift-green img { clip-path: inset(0 0 0 59%); animation: gift-float 4.7s ease-in-out -2.1s infinite; }
+    .gift img, .elf-front img { will-change: transform; }
+    .gift-red img { clip-path: inset(0 38% 0 0); transform-origin: 31% 58%; animation: gift-float-red 4.8s ease-in-out -1.2s infinite; }
+    .gift-green img { clip-path: inset(0 0 0 59%); transform-origin: 78% 58%; animation: gift-float-green 5.4s ease-in-out -3.3s infinite; }
     .elf-front { left: 16.177px; top: 368.239px; width: 703px; height: 329px; --angle: -6.41deg; transform: translate3d(var(--foreground-x, 0px), var(--foreground-y, 0px), 0) rotate(var(--angle)); will-change: transform; }
-    .elf-front img { animation: elf-float 5.8s ease-in-out infinite; }
+    .elf-front img { animation: elf-float 5.1s ease-in-out -.9s infinite; }
     .logo-shadow { left: 495.108px; top: 286.025px; width: 301.982px; height: 266.508px; --angle: 2.95deg; }
     .game-logo { left: 173.546px; top: 156.808px; width: 1015.096px; height: 474.803px; --angle: 2.95deg; }
     .logo-motion { position: absolute; inset: 0; pointer-events: none; transform: translate3d(var(--logo-x, 0px), var(--logo-y, 0px), 0); animation: logo-breathe 5s ease-in-out infinite; will-change: transform; }
@@ -63,8 +64,9 @@
     .studio-logo__top span:nth-child(5) { transform: rotate(-4deg); background-image: linear-gradient(#ffcee3, #ff2e5f); }
     .studio-logo__dance { display: block; position: absolute; left: 5px; top: 53px; width: 162.786px; height: 33.255px; opacity: .9; }
     @keyframes reveal { from { opacity: 0; filter: brightness(.72); } to { opacity: 1; filter: brightness(1); } }
-    @keyframes elf-float { 0%, 100% { transform: translateY(0) rotate(-.3deg); } 50% { transform: translateY(-6px) rotate(.4deg); } }
-    @keyframes gift-float { 0%, 100% { transform: translateY(2px); } 50% { transform: translateY(-6px); } }
+    @keyframes elf-float { 0%, 100% { transform: translate3d(0, 3px, 0) rotate(-.7deg); } 50% { transform: translate3d(4px, -12px, 0) rotate(.8deg); } }
+    @keyframes gift-float-red { 0%, 100% { transform: translate3d(0, 3px, 0) rotate(-.8deg); } 50% { transform: translate3d(2px, -13px, 0) rotate(1.4deg); } }
+    @keyframes gift-float-green { 0%, 100% { transform: translate3d(0, -2px, 0) rotate(.7deg); } 50% { transform: translate3d(-3px, -16px, 0) rotate(-1.3deg); } }
     @keyframes logo-breathe { 0%, 100% { transform: translate3d(var(--logo-x, 0px), var(--logo-y, 0px), 0) rotate(-.25deg); } 50% { transform: translate3d(var(--logo-x, 0px), calc(var(--logo-y, 0px) - 5px), 0) rotate(.35deg); } }
     @media (max-width: 600px) {
       .artboard { left: 0; height: 1060px; transform-origin: top left; transform: scale(var(--scale, 1)); }
