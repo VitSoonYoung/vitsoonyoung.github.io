@@ -15,8 +15,8 @@
     html, body { margin: 0; min-height: 100%; }
     body { min-height: 100vh; overflow-x: hidden; background: #180968; }
     .page { min-height: 160vh; overflow: hidden; }
-    .scene-shell { position: relative; width: 100%; overflow: hidden; opacity: 0; animation: reveal 1.15s ease-out forwards; }
-    .artboard { position: absolute; top: 0; left: 50%; width: 1232px; height: 817px; overflow: hidden; transform-origin: top center; transform: translateX(-50%) scale(var(--scale, 1)); isolation: isolate; }
+    .scene-shell { position: relative; width: 100%; overflow: hidden; background: #180968; opacity: 0; animation: reveal 1.15s ease-out forwards; }
+    .artboard { position: absolute; top: 0; left: 50%; width: 1232px; height: 817px; overflow: hidden; background: #180968; transform-origin: top center; transform: translateX(-50%) scale(var(--scale, 1)); isolation: isolate; }
     .layer, .sprite { position: absolute; }
     .layer, .sprite { pointer-events: none; }
     .layer img, .sprite img { display: block; width: 100%; height: 100%; }
@@ -25,6 +25,7 @@
     .rotated.parallax { transform: translate3d(var(--move-x, 0px), var(--move-y, 0px), 0) rotate(var(--angle)); }
     .flight { position: absolute; inset: 0; pointer-events: none; transform: translate3d(var(--flight-x, 0px), var(--flight-y, 0px), 0); will-change: transform; }
     .cloud-high { left: 0; top: 0; width: 1232px; height: 576px; }
+    .mobile-background { display: none; left: 0; top: -24px; width: 1232px; height: 842px; }
     .ellipse-72 { left: 321.98px; top: 49.995px; width: 1198px; height: 477px; --angle: 27.01deg; }
     .ellipse-73 { left: -320.015px; top: -164.495px; width: 1198px; height: 477px; --angle: 15.51deg; }
     .cloud-far { left: 0; top: 0; width: 1232px; height: 576px; }
@@ -67,8 +68,10 @@
     @keyframes logo-breathe { 0%, 100% { transform: translate3d(var(--logo-x, 0px), var(--logo-y, 0px), 0) rotate(-.25deg); } 50% { transform: translate3d(var(--logo-x, 0px), calc(var(--logo-y, 0px) - 5px), 0) rotate(.35deg); } }
     @media (max-width: 600px) {
       .artboard { left: 0; height: 1060px; transform-origin: top left; transform: scale(var(--scale, 1)); }
-      .moon { left: -950px; }
-      .moon-light { left: 650px; }
+      .artboard > .parallax:not(.mobile-background), .flight { display: none; }
+      .mobile-background { display: block; }
+      .fade-slope { left: -40px; top: 300px; width: 830px; height: 650px; transform: none; background: linear-gradient(180deg, rgba(24,9,104,0) 0%, rgba(24,9,104,.18) 26%, rgba(24,9,104,.7) 55%, #180968 82%); }
+      .fade-bottom { display: none; }
       .game-logo { left: -295px; top: 400px; }
       .logo-shadow { left: 26.562px; top: 529.217px; }
       .elf-front { left: -65px; top: 660px; }
@@ -89,6 +92,7 @@
   <main class="page" aria-label="Christmas Around game landing page">
     <div class="scene-shell" id="scene-shell">
       <div class="artboard" id="artboard">
+        <div class="layer mobile-background parallax" data-depth="5" aria-hidden="true"><img src="assets/ca_background_mobile.png" alt=""></div>
         <div class="layer cloud-high parallax" data-depth="9" aria-hidden="true"><img src="assets/cloud_high.png" alt=""></div>
         <div class="layer ellipse-72 rotated parallax" data-depth="9" aria-hidden="true"><img src="assets/ellipse72.svg" alt=""></div>
         <div class="layer ellipse-73 rotated parallax" data-depth="9" aria-hidden="true"><img src="assets/ellipse73.svg" alt=""></div>
