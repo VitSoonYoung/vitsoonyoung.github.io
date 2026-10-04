@@ -713,9 +713,12 @@ main.page {
   height: 72px;
   place-items: center;
   margin: 0 auto 13px;
-  border: 1px dashed rgba(189, 216, 255, .5);
+  border: 1px solid rgba(217, 230, 255, .42);
   border-radius: 24px;
-  background: radial-gradient(circle, rgba(79, 197, 255, .24), rgba(88, 49, 174, .16) 68%, transparent 70%);
+  background: linear-gradient(145deg, rgba(211, 234, 255, .23), rgba(21, 19, 104, .42) 65%);
+  box-shadow: 0 9px 27px rgba(9, 7, 64, .28), inset 0 1px 0 rgba(255, 255, 255, .34), inset 0 0 18px rgba(166, 218, 255, .12);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
   color: #ffe37a;
   font-size: 38px;
   text-shadow: 0 0 14px rgba(255, 218, 80, .9);
