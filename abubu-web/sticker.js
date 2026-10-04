@@ -135,11 +135,11 @@
       context.fill();
       context.shadowColor = 'transparent';
       context.clip();
-      context.rotate(.18);
+      context.transform(0, 1, 1, 0, width - depth, depth - width);
       context.fillStyle = 'rgba(66, 77, 105, .13)';
       context.font = '600 12px system-ui';
-      for (let row = -2; row < 20; row += 1) {
-        for (let column = -4; column < 12; column += 1) context.fillText('Abubu Dance', column * 125, row * 43);
+      for (let row = -2; row * 43 < height + 86; row += 1) {
+        for (let column = -2; column * 125 < width + 250; column += 1) context.fillText('Abubu Dance', column * 125, row * 43);
       }
       context.restore();
     }
@@ -271,7 +271,7 @@
       const inwardX = (event.clientX - dragStart.x) * (corner.endsWith('right') ? -1 : 1);
       const inwardY = (event.clientY - dragStart.y) * (corner.startsWith('top') ? 1 : -1);
       dragStart.movement = Math.max(dragStart.movement, Math.abs(inwardX) + Math.abs(inwardY));
-      const depthChange = inwardX + inwardY;
+      const depthChange = (inwardX + inwardY) * .5;
       setPeel((dragStart.depth + depthChange) / depthLimit());
       return;
     }
