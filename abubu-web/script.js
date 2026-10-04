@@ -44,6 +44,7 @@
   const position = { x: 0, y: 0, targetX: 0, targetY: 0 };
   const particles = [];
   const candyColors = ['#ff4f52', '#35e29b', '#ffd64a', '#fff4dc'];
+  const sparkColors = ['#fff7cf', '#ffd858', '#8feaff', '#ffb8ee'];
   let previousPoint = null;
   let candyDistance = 0;
   let lastFrame = 0;
@@ -233,6 +234,44 @@
     });
   };
 
+  const addSparkBurst = (x, y) => {
+    for (let index = 0; index < 14; index += 1) {
+      if (particles.length >= MAX_PARTICLES) particles.shift();
+      const angle = index * Math.PI * 2 / 14 + (Math.random() - .5) * .24;
+      const speed = 130 + Math.random() * 120;
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 7 + Math.random() * 9,
+        life: .25 + Math.random() * .18,
+        age: 0,
+        rotation: angle,
+        color: sparkColors[index % sparkColors.length],
+        spark: true
+      });
+    }
+    if (!trailFrame) trailFrame = requestAnimationFrame(animateTrail);
+  };
+
+  const drawSpark = particle => {
+    const fade = Math.max(0, 1 - particle.age / particle.life);
+    const length = particle.size * (.35 + fade * .65);
+    trailContext.globalAlpha = fade;
+    trailContext.strokeStyle = particle.color;
+    trailContext.shadowColor = particle.color;
+    trailContext.shadowBlur = 12 * fade;
+    trailContext.lineWidth = 1.2 + fade * 1.4;
+    trailContext.lineCap = 'round';
+    trailContext.beginPath();
+    trailContext.moveTo(-length, 0);
+    trailContext.lineTo(0, 0);
+    trailContext.stroke();
+    trailContext.globalAlpha = 1;
+    trailContext.shadowBlur = 0;
+  };
+
   const drawStar = particle => {
     const fade = Math.max(0, 1 - particle.age / particle.life);
     const radius = particle.size * fade;
@@ -294,12 +333,19 @@
       }
       particle.x += particle.vx * elapsed;
       particle.y += particle.vy * elapsed;
-      particle.vy += (particle.candy ? 17 : 12) * elapsed;
-      particle.rotation += particle.spin * elapsed;
+      if (particle.spark) {
+        const drag = Math.exp(-7 * elapsed);
+        particle.vx *= drag;
+        particle.vy *= drag;
+      } else {
+        particle.vy += (particle.candy ? 17 : 12) * elapsed;
+        particle.rotation += particle.spin * elapsed;
+      }
       trailContext.save();
       trailContext.translate(particle.x, particle.y);
       trailContext.rotate(particle.rotation);
-      if (particle.candy) drawCandy(particle);
+      if (particle.spark) drawSpark(particle);
+      else if (particle.candy) drawCandy(particle);
       else drawStar(particle);
       trailContext.restore();
     }
@@ -371,7 +417,10 @@
     position.targetX = Math.max(-1, Math.min(1, (event.clientX / innerWidth - .5) * 2));
     position.targetY = Math.max(-1, Math.min(1, (event.clientY / innerHeight - .5) * 2));
   }, { passive: true });
-  addEventListener('pointerdown', updateCursorVisibility, { passive: true });
+  addEventListener('pointerdown', event => {
+    updateCursorVisibility(event);
+    if (!reduceMotion.matches && event.button === 0) addSparkBurst(event.clientX, event.clientY);
+  }, { passive: true });
   addEventListener('pointerup', updateCursorVisibility, { passive: true });
   addEventListener('pointerout', event => {
     if (!event.relatedTarget) {
