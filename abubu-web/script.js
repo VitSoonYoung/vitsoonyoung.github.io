@@ -301,22 +301,28 @@
   };
 
   addEventListener('resize', resize, { passive: true });
-  addEventListener('pointermove', event => {
-    if (event.pointerType === 'touch') return;
+  const updateCursorVisibility = event => {
+    if (event.pointerType === 'touch') return true;
     const sourceWidth = cursorElement.naturalWidth || 48;
     const sourceHeight = cursorElement.naturalHeight || 58;
     const cursorWidth = CURSOR_SIZE * sourceWidth / sourceHeight;
     cursorElement.style.width = `${cursorWidth}px`;
     cursorElement.style.left = `${event.clientX - cursorWidth * 4 / sourceWidth}px`;
     cursorElement.style.top = `${event.clientY - CURSOR_SIZE * 3 / sourceHeight}px`;
-    if (cursorElement.complete && cursorElement.naturalWidth) {
-      document.body.classList.add('cursor-ready');
-    } else {
-      document.body.classList.remove('cursor-ready');
-    }
+    const target = event.target instanceof Element ? event.target : document.elementFromPoint(event.clientX, event.clientY);
+    if (!target) return false;
+    const cursor = getComputedStyle(target).cursor;
+    const useNativeCursor = cursor !== 'auto' && cursor !== 'default' && cursor !== 'none' && !cursor.startsWith('url(');
+    document.body.classList.toggle('cursor-ready', !useNativeCursor && cursorElement.complete && !!cursorElement.naturalWidth);
+    return useNativeCursor;
+  };
+
+  addEventListener('pointermove', event => {
+    if (event.pointerType === 'touch') return;
+    const useNativeCursor = updateCursorVisibility(event);
     const trailX = event.clientX + TRAIL_OFFSET_X;
     const trailY = event.clientY + TRAIL_OFFSET_Y;
-    if (!reduceMotion.matches) {
+    if (!reduceMotion.matches && !useNativeCursor) {
       if (previousPoint) {
         const dx = trailX - previousPoint.x;
         const dy = trailY - previousPoint.y;
@@ -338,11 +344,13 @@
       }
       previousPoint = { x: trailX, y: trailY };
       if (particles.length && !trailFrame) trailFrame = requestAnimationFrame(animateTrail);
-    }
+    } else previousPoint = null;
     if (reduceMotion.matches) return;
     position.targetX = Math.max(-1, Math.min(1, (event.clientX / innerWidth - .5) * 2));
     position.targetY = Math.max(-1, Math.min(1, (event.clientY / innerHeight - .5) * 2));
   }, { passive: true });
+  addEventListener('pointerdown', updateCursorVisibility, { passive: true });
+  addEventListener('pointerup', updateCursorVisibility, { passive: true });
   addEventListener('pointerout', event => {
     if (!event.relatedTarget) {
       previousPoint = null;

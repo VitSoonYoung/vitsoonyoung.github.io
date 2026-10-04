@@ -3,8 +3,22 @@
   const toggle = header.querySelector('.site-menu-toggle');
   const navigation = document.getElementById('site-nav');
   const compact = matchMedia('(max-width: 900px)');
+  const links = [...navigation.querySelectorAll('a')];
+  const games = document.getElementById('games');
+  const about = document.getElementById('about');
   let previousScroll = Math.max(0, window.scrollY);
   let frame = 0;
+
+  const updateActiveSection = currentScroll => {
+    const position = currentScroll + Math.min(innerHeight * .45, 480);
+    const aboutTop = about.getBoundingClientRect().top + currentScroll;
+    const gamesTop = games.getBoundingClientRect().top + currentScroll;
+    const active = position >= aboutTop ? '#about' : position >= gamesTop ? '#games' : '#top';
+    links.forEach(link => {
+      if (link.getAttribute('href') === active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  };
 
   const showHeader = () => {
     header.classList.remove('is-hidden');
@@ -30,7 +44,7 @@
     showHeader();
   });
 
-  navigation.querySelectorAll('a').forEach(link => {
+  links.forEach(link => {
     link.addEventListener('click', closeMenu);
   });
 
@@ -51,12 +65,15 @@
     if (currentScroll < 90 || toggle.getAttribute('aria-expanded') === 'true') showHeader();
     else if (movement > 5 && currentScroll > 150) hideHeader();
     else if (movement < -5) showHeader();
+    updateActiveSection(currentScroll);
     previousScroll = currentScroll;
   };
 
   window.addEventListener('scroll', () => {
     if (!frame) frame = requestAnimationFrame(updateHeader);
   }, { passive: true });
+  window.addEventListener('resize', () => updateActiveSection(Math.max(0, window.scrollY)), { passive: true });
+  updateActiveSection(previousScroll);
 
   const sections = document.querySelectorAll('.reveal-on-scroll');
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
