@@ -13,12 +13,33 @@
   let interacted = false;
   let dragStart = null;
   let animation = 0;
+  let fallPending = false;
+  let flyingSticker = null;
   let glowX = .5;
   let glowY = .5;
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const depthLimit = () => Math.min(width * .82, height * .83);
+  const depthLimit = () => width + height;
   const mapPoint = (x, y) => [corner.endsWith('right') ? x : width - x, corner.startsWith('top') ? y : height - y];
+
+  const clipPolygon = (points, depth, keepFront) => {
+    const distance = ([x, y]) => width - x + y;
+    const inside = point => keepFront ? distance(point) >= depth : distance(point) <= depth;
+    const result = [];
+    points.forEach((point, index) => {
+      const previous = points[(index + points.length - 1) % points.length];
+      const previousInside = inside(previous);
+      const pointInside = inside(point);
+      if (previousInside !== pointInside) {
+        const previousDistance = distance(previous);
+        const nextDistance = distance(point);
+        const progress = (depth - previousDistance) / (nextDistance - previousDistance);
+        result.push([previous[0] + (point[0] - previous[0]) * progress, previous[1] + (point[1] - previous[1]) * progress]);
+      }
+      if (pointInside) result.push(point);
+    });
+    return result;
+  };
 
   const tracePolygon = points => {
     context.beginPath();
@@ -54,103 +75,130 @@
   const render = () => {
     if (!width || !height || !front.naturalWidth) return;
     const depth = peel * depthLimit();
-    const start = { x: width - depth, y: 0 };
-    const end = { x: width, y: depth };
-    const tip = { x: width - depth * .94, y: depth * .92 };
-    const middle = { x: width - depth / 2, y: depth / 2 };
+    const rectangle = [[0, 0], [width, 0], [width, height], [0, height]];
+    const remaining = clipPolygon(rectangle, depth, true);
     context.clearRect(0, 0, width, height);
 
-    context.save();
-    tracePolygon([[0, 0], [start.x, 0], [end.x, end.y], [width, height], [0, height]].map(point => mapPoint(...point)));
-    context.clip();
-    context.fillStyle = '#fff';
-    context.fillRect(0, 0, width, height);
-    coverImage();
-    const light = context.createRadialGradient(glowX * width, glowY * height, 4, glowX * width, glowY * height, width * .65);
-    light.addColorStop(0, 'rgba(255, 255, 255, .56)');
-    light.addColorStop(.25, 'rgba(117, 235, 255, .21)');
-    light.addColorStop(.55, 'rgba(246, 143, 255, .12)');
-    light.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    context.globalAlpha = card.classList.contains('is-hovered') ? .85 : .12;
-    context.fillStyle = light;
-    context.fillRect(0, 0, width, height);
-    context.restore();
+    if (remaining.length > 2) {
+      context.save();
+      tracePolygon(remaining.map(point => mapPoint(...point)));
+      context.clip();
+      context.fillStyle = '#fff';
+      context.fillRect(0, 0, width, height);
+      coverImage();
+      const light = context.createRadialGradient(glowX * width, glowY * height, 4, glowX * width, glowY * height, width * .65);
+      light.addColorStop(0, 'rgba(255, 255, 255, .56)');
+      light.addColorStop(.25, 'rgba(117, 235, 255, .21)');
+      light.addColorStop(.55, 'rgba(246, 143, 255, .12)');
+      light.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      context.globalAlpha = card.classList.contains('is-hovered') ? .85 : .12;
+      context.fillStyle = light;
+      context.fillRect(0, 0, width, height);
+      context.restore();
+    }
 
     if (depth < 1) return;
-    context.save();
-    transformToCorner();
-    tracePolygon([[start.x, 0], [width, 0], [width, end.y]]);
-    context.clip();
-    const shadow = context.createLinearGradient(middle.x, middle.y, middle.x + 68, middle.y - 68);
-    shadow.addColorStop(0, 'rgba(8, 10, 46, .48)');
-    shadow.addColorStop(.34, 'rgba(8, 10, 46, .22)');
-    shadow.addColorStop(1, 'rgba(8, 10, 46, 0)');
-    context.fillStyle = shadow;
-    context.fillRect(0, 0, width, height);
-    context.restore();
-
-    const flap = () => {
-      context.beginPath();
-      context.moveTo(start.x, 0);
-      context.quadraticCurveTo(start.x - depth * .03, depth * .57, tip.x, tip.y);
-      context.quadraticCurveTo(width - depth * .25, depth * 1.02, end.x, end.y);
-      context.closePath();
-    };
-
-    context.save();
-    transformToCorner();
-    flap();
-    context.shadowColor = 'rgba(5, 6, 36, .54)';
-    context.shadowBlur = 12 + peel * 23;
-    context.shadowOffsetX = 5 + peel * 8;
-    context.shadowOffsetY = 6 + peel * 10;
-    const paper = context.createLinearGradient(start.x, 0, tip.x, tip.y);
-    paper.addColorStop(0, '#fffefb');
-    paper.addColorStop(.24, '#e9edf2');
-    paper.addColorStop(.57, '#f9f8f2');
-    paper.addColorStop(.83, '#d1d9e6');
-    paper.addColorStop(1, '#fafbff');
-    context.fillStyle = paper;
-    context.fill();
-    context.restore();
-
-    context.save();
-    transformToCorner();
-    flap();
-    context.clip();
-    context.translate(start.x, 0);
-    context.rotate(.35);
-    context.fillStyle = 'rgba(66, 77, 105, .12)';
-    context.font = '600 12px system-ui';
-    for (let row = 0; row < 16; row += 1) {
-      for (let column = -3; column < 8; column += 1) context.fillText('Abubu Dance', column * 125, row * 43);
-    }
-    context.restore();
+    const peeled = clipPolygon(rectangle, depth, false);
+    const folded = peeled.map(([x, y]) => {
+      const offset = depth - (width - x + y);
+      return [x - offset, y + offset];
+    });
 
     context.save();
     transformToCorner();
     context.beginPath();
-    context.moveTo(start.x, 0);
-    context.lineTo(end.x, end.y);
+    context.moveTo(width - depth, 0);
+    context.lineTo(width - depth + height, height);
+    context.shadowColor = 'rgba(5, 6, 36, .75)';
+    context.shadowBlur = 16 + peel * 30;
+    context.shadowOffsetX = 7;
+    context.shadowOffsetY = 8;
+    context.strokeStyle = 'rgba(10, 10, 45, .28)';
+    context.lineWidth = 8;
+    context.stroke();
+    context.restore();
+
+    if (folded.length > 2) {
+      context.save();
+      transformToCorner();
+      tracePolygon(folded);
+      context.shadowColor = 'rgba(5, 6, 36, .55)';
+      context.shadowBlur = 12 + peel * 22;
+      context.shadowOffsetX = 5;
+      context.shadowOffsetY = 7;
+      const paper = context.createLinearGradient(width - depth, 0, width, Math.min(depth, height));
+      paper.addColorStop(0, '#fffefb');
+      paper.addColorStop(.38, '#e6eaf1');
+      paper.addColorStop(.7, '#faf9f5');
+      paper.addColorStop(1, '#cdd6e5');
+      context.fillStyle = paper;
+      context.fill();
+      context.shadowColor = 'transparent';
+      context.clip();
+      context.rotate(.18);
+      context.fillStyle = 'rgba(66, 77, 105, .13)';
+      context.font = '600 12px system-ui';
+      for (let row = -2; row < 20; row += 1) {
+        for (let column = -4; column < 12; column += 1) context.fillText('Abubu Dance', column * 125, row * 43);
+      }
+      context.restore();
+    }
+
+    context.save();
+    transformToCorner();
+    context.beginPath();
+    context.moveTo(width - depth, 0);
+    context.lineTo(width - depth + height, height);
     context.strokeStyle = 'rgba(20, 24, 58, .32)';
-    context.lineWidth = 5;
+    context.lineWidth = 4;
     context.stroke();
     context.strokeStyle = 'rgba(255, 255, 255, .9)';
     context.lineWidth = 1.5;
     context.stroke();
-    context.beginPath();
-    context.moveTo(start.x, 0);
-    context.quadraticCurveTo(start.x - depth * .03, depth * .57, tip.x, tip.y);
-    context.quadraticCurveTo(width - depth * .25, depth * 1.02, end.x, end.y);
-    context.strokeStyle = 'rgba(255, 255, 255, .85)';
-    context.lineWidth = 2;
-    context.stroke();
     context.restore();
+  };
+
+  const removeFlyingSticker = () => {
+    if (!flyingSticker) return;
+    flyingSticker.remove();
+    flyingSticker = null;
+  };
+
+  const launchFlyaway = () => {
+    if (reduceMotion.matches) return;
+    removeFlyingSticker();
+    const bounds = card.getBoundingClientRect();
+    const horizontal = corner.endsWith('right') ? 1 : -1;
+    const vertical = corner.startsWith('top') ? 0 : 100;
+    const flyer = document.createElement('div');
+    flyer.className = 'peel-card__flyaway';
+    flyer.setAttribute('aria-hidden', 'true');
+    flyer.style.left = `${bounds.left}px`;
+    flyer.style.top = `${bounds.top}px`;
+    flyer.style.width = `${bounds.width}px`;
+    flyer.style.height = `${bounds.height}px`;
+    flyer.style.transformOrigin = `${horizontal > 0 ? 100 : 0}% ${vertical}%`;
+    document.body.append(flyer);
+    flyingSticker = flyer;
+    const drop = Math.max(innerHeight - bounds.top + bounds.height, 500);
+    const flight = flyer.animate([
+      { transform: `perspective(900px) translate3d(0, 0, 0) rotateY(${horizontal * 86}deg) rotateZ(${horizontal * 5}deg) scale(.91)`, opacity: 0, offset: 0 },
+      { transform: `perspective(900px) translate3d(${horizontal * 24}px, -20px, 0) rotateY(${horizontal * 62}deg) rotateZ(${horizontal * 14}deg) scale(.86)`, opacity: .92, offset: .18 },
+      { transform: `perspective(900px) translate3d(${horizontal * bounds.width * .32}px, -70px, 0) rotateY(${horizontal * 18}deg) rotateZ(${horizontal * 32}deg) scale(.74)`, opacity: 1, offset: .43 },
+      { transform: `perspective(900px) translate3d(${horizontal * bounds.width * .68}px, ${drop}px, 0) rotateY(${horizontal * 175}deg) rotateZ(${horizontal * 140}deg) scale(.55)`, opacity: 0, offset: 1 }
+    ], { duration: 1350, easing: 'cubic-bezier(.35, .12, .64, 1)', fill: 'forwards' });
+    flight.finished.then(() => {
+      if (flyingSticker === flyer) removeFlyingSticker();
+    }).catch(() => {});
   };
 
   const setPeel = value => {
     peel = clamp(value, 0, 1);
     render();
+    if (fallPending && peel >= .72) {
+      fallPending = false;
+      launchFlyaway();
+    }
   };
 
   const animateTo = (value, duration) => {
@@ -175,7 +223,9 @@
     open = value;
     card.setAttribute('aria-pressed', String(open));
     card.setAttribute('aria-label', open ? 'Place the studio sticker back' : 'Peel any corner of the studio sticker to reveal the Abubu Dance picture');
-    animateTo(open ? 1 : hintPeel, 480);
+    fallPending = open;
+    if (!open) removeFlyingSticker();
+    animateTo(open ? 1 : hintPeel, open ? Math.max(650, (1 - peel) * 1300) : 650);
   };
 
   const findCorner = (x, y) => {
@@ -199,10 +249,7 @@
     const bounds = card.getBoundingClientRect();
     const localX = (event.clientX - bounds.left) * width / bounds.width;
     const localY = (event.clientY - bounds.top) * height / bounds.height;
-    const depth = peel * depthLimit();
-    const [tipX, tipY] = mapPoint(width - depth * .94, depth * .92);
-    const nearTip = open && Math.hypot(localX - tipX, localY - tipY) < Math.max(64, depthLimit() * .27);
-    const nextCorner = nearTip ? corner : findCorner(localX, localY) || (open ? corner : null);
+    const nextCorner = open ? corner : findCorner(localX, localY);
     if (!nextCorner) return;
     event.preventDefault();
     interacted = true;
@@ -224,7 +271,7 @@
       const inwardX = (event.clientX - dragStart.x) * (corner.endsWith('right') ? -1 : 1);
       const inwardY = (event.clientY - dragStart.y) * (corner.startsWith('top') ? 1 : -1);
       dragStart.movement = Math.max(dragStart.movement, Math.abs(inwardX) + Math.abs(inwardY));
-      const depthChange = (inwardX * .94 + inwardY * .92) / (.94 * .94 + .92 * .92);
+      const depthChange = inwardX + inwardY;
       setPeel((dragStart.depth + depthChange) / depthLimit());
       return;
     }

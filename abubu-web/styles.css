@@ -611,6 +611,19 @@ main.page {
   background: none;
 }
 
+.peel-card__flyaway {
+  position: fixed;
+  z-index: 80;
+  box-sizing: border-box;
+  border: 9px solid #fff;
+  border-bottom-width: 22px;
+  border-radius: 10px;
+  background: #fff url("assets/about-sticker.jpg") center / cover no-repeat;
+  box-shadow: 0 22px 42px rgba(5, 5, 36, .56), 0 0 16px rgba(255, 255, 255, .42);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
 .peel-card__surface {
   position: absolute;
   inset: 0;
