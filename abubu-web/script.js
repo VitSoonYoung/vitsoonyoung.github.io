@@ -359,12 +359,15 @@
 
   const resize = () => {
     const scale = shell.clientWidth / 1232;
+    const artHeight = 818 * scale;
     const fadeHeight = 818 - FADE_TOP + innerHeight / scale;
     board.style.setProperty('--scale', scale);
     board.style.setProperty('--fade-height', `${fadeHeight}px`);
     board.style.setProperty('--fade-stop', `${((818 - FADE_TOP) / fadeHeight) * 100}%`);
     board.style.height = `${FADE_TOP + fadeHeight}px`;
-    shell.style.height = `${818 * scale}px`;
+    shell.style.height = `${artHeight}px`;
+    shell.style.setProperty('--mobile-art-top', `${Math.max(84, (innerHeight - artHeight - 60) / 2)}px`);
+    shell.style.setProperty('--mobile-art-height', `${artHeight}px`);
     layoutCarousel();
   };
 
