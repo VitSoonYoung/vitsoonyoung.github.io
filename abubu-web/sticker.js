@@ -12,6 +12,10 @@
   let interacted = false;
   let dragStart = null;
   let animation = 0;
+  let motionFrame = 0;
+  let motionTime = 0;
+  let targetPeel = 0;
+  let peelVelocity = 0;
   let glowX = .5;
   let glowY = .5;
 
@@ -184,8 +188,41 @@
     card.setAttribute('aria-label', lifted ? 'Unpeel the studio sticker' : 'Peel any corner of the studio sticker to reveal the Abubu Dance picture');
   };
 
+  const stopMotion = () => {
+    cancelAnimationFrame(motionFrame);
+    motionFrame = 0;
+    motionTime = 0;
+    peelVelocity = 0;
+  };
+
+  const movePeel = time => {
+    const elapsed = motionTime ? Math.min((time - motionTime) / 1000, .032) : 1 / 60;
+    motionTime = time;
+    const stiffness = dragStart ? 190 : 95;
+    const damping = dragStart ? 25 : 19;
+    peelVelocity += ((targetPeel - peel) * stiffness - peelVelocity * damping) * elapsed;
+    const next = peel + peelVelocity * elapsed;
+    setPeel(next);
+    if ((peel === 0 && peelVelocity < 0) || (peel === 1 && peelVelocity > 0)) peelVelocity = 0;
+    if (Math.abs(targetPeel - peel) < .0005 && Math.abs(peelVelocity) < .003) {
+      setPeel(targetPeel);
+      stopMotion();
+      return;
+    }
+    motionFrame = requestAnimationFrame(movePeel);
+  };
+
+  const startMotion = () => {
+    if (reduceMotion.matches) {
+      setPeel(targetPeel);
+      return;
+    }
+    if (!motionFrame) motionFrame = requestAnimationFrame(movePeel);
+  };
+
   const animateTo = (value, duration) => {
     cancelAnimationFrame(animation);
+    stopMotion();
     if (reduceMotion.matches) {
       setPeel(value);
       return;
@@ -234,22 +271,35 @@
     interacted = true;
     cancelAnimationFrame(animation);
     animation = 0;
+    stopMotion();
     if (corner !== nextCorner) {
       corner = nextCorner;
       setPeel(0);
     }
-    dragStart = { x: event.clientX, y: event.clientY, depth: peel * depthLimit(), movement: 0 };
+    targetPeel = peel;
+    dragStart = { x: event.clientX, y: event.clientY, depth: peel * depthLimit(), movement: 0, velocity: 0, lastTime: performance.now(), lastMoveTime: 0 };
     card.classList.add('is-dragging');
     card.setPointerCapture(event.pointerId);
   });
 
+  const updateDragTarget = event => {
+    const inwardX = (event.clientX - dragStart.x) * (corner.endsWith('right') ? -1 : 1);
+    const inwardY = (event.clientY - dragStart.y) * (corner.startsWith('top') ? 1 : -1);
+    dragStart.movement = Math.max(dragStart.movement, Math.abs(inwardX) + Math.abs(inwardY));
+    const nextTarget = clamp((dragStart.depth + (inwardX + inwardY) * .5) / depthLimit(), 0, 1);
+    const now = performance.now();
+    const elapsed = Math.max((now - dragStart.lastTime) / 1000, .008);
+    const speed = clamp((nextTarget - targetPeel) / elapsed, -3, 3);
+    dragStart.velocity = dragStart.velocity * .5 + speed * .5;
+    dragStart.lastTime = now;
+    if (nextTarget !== targetPeel) dragStart.lastMoveTime = now;
+    targetPeel = nextTarget;
+    startMotion();
+  };
+
   card.addEventListener('pointermove', event => {
     if (dragStart) {
-      const inwardX = (event.clientX - dragStart.x) * (corner.endsWith('right') ? -1 : 1);
-      const inwardY = (event.clientY - dragStart.y) * (corner.startsWith('top') ? 1 : -1);
-      dragStart.movement = Math.max(dragStart.movement, Math.abs(inwardX) + Math.abs(inwardY));
-      const depthChange = (inwardX + inwardY) * .5;
-      setPeel((dragStart.depth + depthChange) / depthLimit());
+      updateDragTarget(event);
       return;
     }
     if (event.pointerType !== 'mouse' || reduceMotion.matches) return;
@@ -262,12 +312,19 @@
     render();
   });
 
-  const endDrag = () => {
+  const endDrag = event => {
     if (!dragStart) return;
+    if (event.type === 'pointerup') updateDragTarget(event);
     const moved = dragStart.movement > 6;
+    const recent = Math.exp(-(performance.now() - dragStart.lastMoveTime) / 90);
+    const momentum = clamp(dragStart.velocity * recent * .14, -.18, .18);
     dragStart = null;
     card.classList.remove('is-dragging');
     if (!moved) togglePeel();
+    else if (event.type === 'pointerup') {
+      targetPeel = clamp(targetPeel + momentum, 0, 1);
+      startMotion();
+    }
   };
 
   card.addEventListener('pointerup', endDrag);
