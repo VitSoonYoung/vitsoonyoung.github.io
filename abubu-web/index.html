@@ -55,6 +55,7 @@
         <div class="game-details">
           <div class="game-tags"></div>
           <p class="game-description"></p>
+          <div class="game-actions" aria-label="Game links"></div>
         </div>
       </section>
 
@@ -111,35 +112,45 @@
         image: 'assets/CALogo.png',
         backgroundImage: 'assets/CABackground.webp',
         tags: ['Party', 'Co op', 'Silly'],
-        description: 'Christmasing Around is a chaotic, co op party game about making Christmas as messy and magical as possible. Play with your friends, cause some holiday havoc, and spread joy... or at least try to.'
+        description: 'Christmasing Around is a chaotic, co op party game about making Christmas as messy and magical as possible. Play with your friends, cause some holiday havoc, and spread joy... or at least try to.',
+        buttons: [
+          { label: 'Explore game', url: '#top', theme: 'primary', external: false },
+          { label: 'About the studio', url: '#about', theme: 'secondary', external: false },
+          { label: 'Search YouTube', url: 'https://www.youtube.com/results?search_query=Christmasing+Around+Abubu+Dance', theme: 'youtube', external: true },
+          { label: 'Search Steam', url: 'https://store.steampowered.com/search/?term=Christmasing%20Around', theme: 'steam', external: true }
+        ]
       },
       {
         name: 'Upcoming game one',
         title: 'Coming Soon',
         image: '',
         tags: ['Coming soon'],
-        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.'
+        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.',
+        buttons: [{ label: 'Meet the studio', url: '#about', theme: 'secondary', external: false }]
       },
       {
         name: 'Upcoming game two',
         title: 'Coming Soon',
         image: '',
         tags: ['Coming soon'],
-        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.'
+        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.',
+        buttons: [{ label: 'Get in touch', url: '#contact', theme: 'primary', external: false }]
       },
       {
         name: 'Upcoming game three',
         title: 'Coming Soon',
         image: '',
         tags: ['Coming soon'],
-        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.'
+        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.',
+        buttons: [{ label: 'Meet the studio', url: '#about', theme: 'secondary', external: false }]
       },
       {
         name: 'Upcoming game four',
         title: 'Coming Soon',
         image: '',
         tags: ['Coming soon'],
-        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.'
+        description: 'More games are coming soon. Keep an eye out for new playful worlds from Abubu Dance.',
+        buttons: [{ label: 'Get in touch', url: '#contact', theme: 'primary', external: false }]
       }
     ];
   </script>

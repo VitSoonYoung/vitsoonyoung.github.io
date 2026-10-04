@@ -515,11 +515,14 @@ main.page {
 
 .game-tags span {
   min-width: 84px;
-  padding: 5px 20px;
-  border: 1px solid #98bfff;
+  padding: 5px 16px;
+  border: 1px solid rgba(217, 230, 255, .42);
   border-radius: 99px;
-  background: linear-gradient(180deg, #547bfa, #1735b4);
-  box-shadow: 0 0 11px rgba(94, 148, 255, .75), inset 0 0 8px rgba(135, 218, 255, .3);
+  background: rgba(21, 19, 104, .42);
+  box-shadow: 0 9px 27px rgba(9, 7, 64, .28), inset 0 1px 0 rgba(255, 255, 255, .34);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  color: #fff;
   font-size: 14px;
   font-weight: 700;
 }
@@ -535,6 +538,78 @@ main.page {
   font-weight: 600;
   line-height: 1.4;
   text-align: center;
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px auto 0;
+  padding: 0 14px 16px;
+}
+
+.game-actions:empty {
+  display: none;
+}
+
+.game-action {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 18px;
+  border: 1px solid #98bfff;
+  border-radius: 99px;
+  background: linear-gradient(180deg, #547bfa, #1735b4);
+  box-shadow: 0 0 11px rgba(94, 148, 255, .75), inset 0 0 8px rgba(135, 218, 255, .3);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  text-shadow: 0 1px 3px rgba(10, 13, 78, .45);
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.game-action:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+}
+
+.game-action:focus-visible {
+  outline: 3px solid #ffdf7e;
+  outline-offset: 3px;
+}
+
+.game-action svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.game-action--youtube {
+  border-color: #ffb3bd;
+  background: linear-gradient(180deg, #f35563, #b91430);
+  box-shadow: 0 0 11px rgba(255, 77, 100, .55), inset 0 0 8px rgba(255, 199, 205, .28);
+}
+
+.game-action--secondary {
+  border-color: #c4caff;
+  background: linear-gradient(180deg, #7d87d2, #424c9a);
+  box-shadow: 0 0 11px rgba(154, 167, 255, .45), inset 0 0 8px rgba(220, 225, 255, .25);
+}
+
+.game-action--steam {
+  border-color: #9ed3ff;
+  background: linear-gradient(180deg, #337fbf, #15366c);
+  box-shadow: 0 0 11px rgba(74, 169, 238, .5), inset 0 0 8px rgba(157, 218, 255, .25);
 }
 
 .about {

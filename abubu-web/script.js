@@ -37,7 +37,9 @@
   const carouselStatus = document.getElementById('carousel-status');
   const gameTags = document.querySelector('.game-tags');
   const gameDescription = document.querySelector('.game-description');
+  const gameActions = document.querySelector('.game-actions');
   const gameDetails = document.querySelector('.game-details');
+  const buttonThemes = new Set(['youtube', 'primary', 'secondary', 'steam']);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const position = { x: 0, y: 0, targetX: 0, targetY: 0 };
   const particles = [];
@@ -61,6 +63,26 @@
       return item;
     }));
     gameDescription.textContent = game.description || '';
+    gameActions.replaceChildren(...(game.buttons || []).filter(button => button.label && button.url).map(button => {
+      const link = document.createElement('a');
+      const theme = buttonThemes.has(button.theme) ? button.theme : 'primary';
+      link.className = `game-action game-action--${theme}`;
+      link.href = button.url;
+      link.textContent = button.label;
+      if (button.external) {
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', `${button.label} opens in a new tab`);
+        const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        icon.setAttribute('viewBox', '0 0 16 16');
+        icon.setAttribute('aria-hidden', 'true');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M8.5 2.5h5v5m0-5L7 9m5.5.5v4h-10v-10h4');
+        icon.append(path);
+        link.append(icon);
+      }
+      return link;
+    }));
   };
 
   const transitionGameDetails = () => {
