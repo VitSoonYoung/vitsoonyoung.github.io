@@ -11,7 +11,16 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="page" aria-label="Christmas Around game landing page">
+  <header class="site-header" id="site-header">
+    <a class="site-brand" href="#top" aria-label="Abubu Dance home"><img src="assets/AbubuDanceLogo.png" alt="Abubu Dance"></a>
+    <button class="site-menu-toggle" type="button" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main navigation">
+      <a href="#top">Upcoming</a>
+      <a href="#games">Games</a>
+      <a href="#about">About Us</a>
+    </nav>
+  </header>
+  <main class="page" id="top" aria-label="Christmas Around game landing page">
     <div class="scene-shell" id="scene-shell">
       <div class="artboard" id="artboard">
         <img class="scene-background" src="assets/CABackground.webp" alt="">
@@ -19,7 +28,6 @@
         <img class="gift" src="assets/CAGift.png" alt="">
         <img class="elf-front" src="assets/CAElfGift.png" alt="">
         <img class="game-logo" src="assets/CALogo.png" alt="">
-        <img class="studio-logo" src="assets/AbubuDanceLogo.png" alt="Abubu Dance">
       </div>
       <div class="hero-actions" aria-label="Game links">
         <button class="hero-button hero-button--wishlist" type="button"><span aria-hidden="true">◉</span> Wishlist</button>
@@ -28,17 +36,17 @@
     </div>
 
     <section class="showcase" aria-label="Abubu Dance games and studio">
-      <section class="partners" aria-labelledby="partners-title">
+      <section class="partners reveal-on-scroll" id="partners" aria-labelledby="partners-title">
         <h2 id="partners-title" class="eyebrow">Our partners</h2>
         <div class="partner-list">
-          <div class="partner-placeholder">Steam</div>
-          <div class="partner-placeholder">itch.io</div>
-          <div class="partner-placeholder">Epic Games</div>
-          <div class="partner-placeholder">Unity</div>
+          <div class="partner-logo"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="43" cy="21" r="14" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="43" cy="21" r="6" fill="currentColor"/><path d="M12 40 34 25l8 10-19 17-11-4Z" fill="currentColor"/><circle cx="17" cy="43" r="8" fill="none" stroke="currentColor" stroke-width="4"/></svg><span>Steam</span></div>
+          <div class="partner-logo"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 18 16 9h32l6 9v11c0 4-4 7-8 5-3 4-9 4-12 0-3 4-9 4-12 0-4 2-8-1-8-5V18Z" fill="currentColor"/><path d="M16 36v17h32V36M26 53V42h12v11" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg><span>itch.io</span></div>
+          <div class="partner-logo"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M11 8h42v36L32 57 11 44Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/><text x="32" y="34" fill="currentColor" text-anchor="middle" font-size="18" font-weight="900">EPIC</text></svg><span>Epic Games</span></div>
+          <div class="partner-logo"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="m32 7 12 7-7 12H22l-7-12ZM10 19l10 6 1 16-11 6-7-12ZM54 19l7 16-7 12-11-6 1-16ZM23 45h18l6 11H17Z" fill="currentColor"/></svg><span>Unity</span></div>
         </div>
       </section>
 
-      <section class="games" aria-labelledby="games-title">
+      <section class="games reveal-on-scroll" id="games" aria-labelledby="games-title">
         <h2 id="games-title" class="section-title">Our Games</h2>
         <div class="game-carousel" id="game-carousel" role="region" aria-label="Game poster carousel. Swipe or use the arrow keys to browse games" tabindex="0">
           <div class="carousel-track"></div>
@@ -50,11 +58,17 @@
         </div>
       </section>
 
-      <section class="about" aria-labelledby="about-title">
+      <section class="about reveal-on-scroll" id="about" aria-labelledby="about-title">
         <div class="about-visual">
           <h2 id="about-title" class="section-title">About Us</h2>
-          <div class="photo-placeholder" aria-label="Studio photo placeholder">
-            <span>Studio photo placeholder</span>
+          <div class="peel-card" id="about-sticker" role="button" tabindex="0" aria-label="Peel any corner of the studio sticker to reveal the Abubu Dance picture" aria-pressed="false">
+            <div class="peel-card__surface" aria-hidden="true">
+              <div class="peel-card__reveal">
+                <img src="assets/CABackground.webp" alt="">
+                <span>Abubu Dance</span>
+              </div>
+            </div>
+            <canvas class="peel-card__canvas" aria-hidden="true"></canvas>
           </div>
           <div class="note-placeholder">Been making weird silly games since 2024</div>
         </div>
@@ -72,7 +86,7 @@
         </div>
       </section>
 
-      <section class="values" aria-labelledby="values-title">
+      <section class="values reveal-on-scroll" id="values" aria-labelledby="values-title">
         <h2 id="values-title" class="section-title"><span class="title-spark title-spark--gold">〽</span> What we love and yuck! <span class="title-spark title-spark--gold">〽</span></h2>
         <div class="value-list">
           <article class="value-item"><div class="icon-placeholder">✦</div><p>Party, incremental,<br>story rich or just<br>silly games</p></article>
@@ -82,6 +96,10 @@
         </div>
       </section>
     </section>
+    <footer class="site-footer reveal-on-scroll" id="contact">
+      <p>© 2026 Abubu Dance. All rights reserved.</p>
+      <a class="contact-button" href="mailto:hi@abubudance.com"><span aria-hidden="true">✉</span> Contact us</a>
+    </footer>
   </main>
   <canvas class="cursor-trail" id="cursor-trail" aria-hidden="true"></canvas>
   <img class="custom-cursor" id="custom-cursor" src="assets/cursor.png" alt="" aria-hidden="true">
@@ -126,6 +144,8 @@
     ];
   </script>
   <script src="script.js" defer></script>
+  <script src="sticker.js" defer></script>
+  <script src="navigation.js" defer></script>
 
 </body>
 </html>

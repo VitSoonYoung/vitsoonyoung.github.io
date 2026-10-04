@@ -37,6 +37,7 @@
   const carouselStatus = document.getElementById('carousel-status');
   const gameTags = document.querySelector('.game-tags');
   const gameDescription = document.querySelector('.game-description');
+  const gameDetails = document.querySelector('.game-details');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const position = { x: 0, y: 0, targetX: 0, targetY: 0 };
   const particles = [];
@@ -50,6 +51,42 @@
   let carouselVisible = false;
   let carouselHovered = false;
   let swipeStart = null;
+  let detailsTimer = 0;
+
+  const renderGameDetails = () => {
+    const game = carouselGames[activeSlide];
+    gameTags.replaceChildren(...(game.tags || []).map(tag => {
+      const item = document.createElement('span');
+      item.textContent = tag;
+      return item;
+    }));
+    gameDescription.textContent = game.description || '';
+  };
+
+  const transitionGameDetails = () => {
+    clearTimeout(detailsTimer);
+    if (reduceMotion.matches) {
+      renderGameDetails();
+      gameDetails.style.height = 'auto';
+      return;
+    }
+    const previousHeight = gameDetails.getBoundingClientRect().height;
+    gameDetails.style.height = `${previousHeight}px`;
+    gameDetails.classList.add('is-changing');
+    detailsTimer = setTimeout(() => {
+      renderGameDetails();
+      gameDetails.style.height = 'auto';
+      const nextHeight = gameDetails.offsetHeight;
+      gameDetails.style.height = `${previousHeight}px`;
+      gameDetails.offsetHeight;
+      gameDetails.style.height = `${nextHeight}px`;
+      gameDetails.classList.remove('is-changing');
+    }, 105);
+  };
+
+  gameDetails.addEventListener('transitionend', event => {
+    if (event.propertyName === 'height' && !gameDetails.classList.contains('is-changing')) gameDetails.style.height = 'auto';
+  });
 
   const scheduleCarousel = () => {
     clearTimeout(carouselTimer);
@@ -70,27 +107,21 @@
         slide.style.setProperty('--shift', '0px');
         slide.setAttribute('aria-hidden', 'false');
         carouselStatus.textContent = carouselGames[index].name;
-        gameTags.replaceChildren(...(carouselGames[index].tags || []).map(tag => {
-          const item = document.createElement('span');
-          item.textContent = tag;
-          return item;
-        }));
-        gameDescription.textContent = carouselGames[index].description || '';
       } else if (distance === 1) {
         slide.classList.add('is-right');
-        slide.style.setProperty('--shift', `${width * .34}px`);
+        slide.style.setProperty('--shift', `${width * .39}px`);
         slide.setAttribute('aria-hidden', 'true');
       } else if (distance === count - 1) {
         slide.classList.add('is-left');
-        slide.style.setProperty('--shift', `${width * -.34}px`);
+        slide.style.setProperty('--shift', `${width * -.39}px`);
         slide.setAttribute('aria-hidden', 'true');
       } else if (distance < count / 2) {
         slide.classList.add('is-far-right');
-        slide.style.setProperty('--shift', `${width * .48}px`);
+        slide.style.setProperty('--shift', `${width * .54}px`);
         slide.setAttribute('aria-hidden', 'true');
       } else {
         slide.classList.add('is-far-left');
-        slide.style.setProperty('--shift', `${width * -.48}px`);
+        slide.style.setProperty('--shift', `${width * -.54}px`);
         slide.setAttribute('aria-hidden', 'true');
       }
     });
@@ -100,6 +131,7 @@
     activeSlide = (activeSlide + direction + carouselSlides.length) % carouselSlides.length;
     carouselStatus.setAttribute('aria-live', announce ? 'polite' : 'off');
     layoutCarousel();
+    transitionGameDetails();
     scheduleCarousel();
   };
 
@@ -330,6 +362,7 @@
     }
   }
 
+  renderGameDetails();
   resize();
   requestAnimationFrame(() => carousel.classList.add('is-ready'));
   resizeTrail();
