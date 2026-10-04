@@ -9,12 +9,9 @@
   let height = 0;
   let peel = 0;
   let corner = 'top-right';
-  let open = false;
   let interacted = false;
   let dragStart = null;
   let animation = 0;
-  let fallPending = false;
-  let flyingSticker = null;
   let glowX = .5;
   let glowY = .5;
 
@@ -46,6 +43,25 @@
     points.forEach(([x, y], index) => {
       if (index) context.lineTo(x, y);
       else context.moveTo(x, y);
+    });
+    context.closePath();
+  };
+
+  const traceRoundedPolygon = (points, radii) => {
+    context.beginPath();
+    points.forEach(([x, y], index) => {
+      const previous = points[(index + points.length - 1) % points.length];
+      const next = points[(index + 1) % points.length];
+      const incoming = Math.hypot(previous[0] - x, previous[1] - y);
+      const outgoing = Math.hypot(next[0] - x, next[1] - y);
+      const radius = Math.min(radii[index], incoming * .45, outgoing * .45);
+      const startX = x + (previous[0] - x) * radius / (incoming || 1);
+      const startY = y + (previous[1] - y) * radius / (incoming || 1);
+      const endX = x + (next[0] - x) * radius / (outgoing || 1);
+      const endY = y + (next[1] - y) * radius / (outgoing || 1);
+      if (index) context.lineTo(startX, startY);
+      else context.moveTo(startX, startY);
+      context.quadraticCurveTo(x, y, endX, endY);
     });
     context.closePath();
   };
@@ -121,7 +137,9 @@
     if (folded.length > 2) {
       context.save();
       transformToCorner();
-      tracePolygon(folded);
+      traceRoundedPolygon(folded, peeled.map(([x, y]) =>
+        (x === 0 || x === width) && (y === 0 || y === height) ? 10 : 0
+      ));
       context.shadowColor = 'rgba(5, 6, 36, .55)';
       context.shadowBlur = 12 + peel * 22;
       context.shadowOffsetX = 5;
@@ -158,47 +176,12 @@
     context.restore();
   };
 
-  const removeFlyingSticker = () => {
-    if (!flyingSticker) return;
-    flyingSticker.remove();
-    flyingSticker = null;
-  };
-
-  const launchFlyaway = () => {
-    if (reduceMotion.matches) return;
-    removeFlyingSticker();
-    const bounds = card.getBoundingClientRect();
-    const horizontal = corner.endsWith('right') ? 1 : -1;
-    const vertical = corner.startsWith('top') ? 0 : 100;
-    const flyer = document.createElement('div');
-    flyer.className = 'peel-card__flyaway';
-    flyer.setAttribute('aria-hidden', 'true');
-    flyer.style.left = `${bounds.left}px`;
-    flyer.style.top = `${bounds.top}px`;
-    flyer.style.width = `${bounds.width}px`;
-    flyer.style.height = `${bounds.height}px`;
-    flyer.style.transformOrigin = `${horizontal > 0 ? 100 : 0}% ${vertical}%`;
-    document.body.append(flyer);
-    flyingSticker = flyer;
-    const drop = Math.max(innerHeight - bounds.top + bounds.height, 500);
-    const flight = flyer.animate([
-      { transform: `perspective(900px) translate3d(0, 0, 0) rotateY(${horizontal * 86}deg) rotateZ(${horizontal * 5}deg) scale(.91)`, opacity: 0, offset: 0 },
-      { transform: `perspective(900px) translate3d(${horizontal * 24}px, -20px, 0) rotateY(${horizontal * 62}deg) rotateZ(${horizontal * 14}deg) scale(.86)`, opacity: .92, offset: .18 },
-      { transform: `perspective(900px) translate3d(${horizontal * bounds.width * .32}px, -70px, 0) rotateY(${horizontal * 18}deg) rotateZ(${horizontal * 32}deg) scale(.74)`, opacity: 1, offset: .43 },
-      { transform: `perspective(900px) translate3d(${horizontal * bounds.width * .68}px, ${drop}px, 0) rotateY(${horizontal * 175}deg) rotateZ(${horizontal * 140}deg) scale(.55)`, opacity: 0, offset: 1 }
-    ], { duration: 1350, easing: 'cubic-bezier(.35, .12, .64, 1)', fill: 'forwards' });
-    flight.finished.then(() => {
-      if (flyingSticker === flyer) removeFlyingSticker();
-    }).catch(() => {});
-  };
-
   const setPeel = value => {
     peel = clamp(value, 0, 1);
     render();
-    if (fallPending && peel >= .72) {
-      fallPending = false;
-      launchFlyaway();
-    }
+    const lifted = peel > hintPeel + .01;
+    card.setAttribute('aria-pressed', String(lifted));
+    card.setAttribute('aria-label', lifted ? 'Unpeel the studio sticker' : 'Peel any corner of the studio sticker to reveal the Abubu Dance picture');
   };
 
   const animateTo = (value, duration) => {
@@ -219,13 +202,9 @@
     animation = requestAnimationFrame(animate);
   };
 
-  const setOpen = value => {
-    open = value;
-    card.setAttribute('aria-pressed', String(open));
-    card.setAttribute('aria-label', open ? 'Place the studio sticker back' : 'Peel any corner of the studio sticker to reveal the Abubu Dance picture');
-    fallPending = open;
-    if (!open) removeFlyingSticker();
-    animateTo(open ? 1 : hintPeel, open ? Math.max(650, (1 - peel) * 1300) : 650);
+  const togglePeel = () => {
+    const expand = peel <= hintPeel + .01;
+    animateTo(expand ? 1 : hintPeel, expand ? Math.max(650, (1 - peel) * 1300) : 650);
   };
 
   const findCorner = (x, y) => {
@@ -249,7 +228,7 @@
     const bounds = card.getBoundingClientRect();
     const localX = (event.clientX - bounds.left) * width / bounds.width;
     const localY = (event.clientY - bounds.top) * height / bounds.height;
-    const nextCorner = open ? corner : findCorner(localX, localY);
+    const nextCorner = peel > hintPeel + .01 ? corner : findCorner(localX, localY);
     if (!nextCorner) return;
     event.preventDefault();
     interacted = true;
@@ -257,8 +236,6 @@
     animation = 0;
     if (corner !== nextCorner) {
       corner = nextCorner;
-      open = false;
-      card.setAttribute('aria-pressed', 'false');
       setPeel(0);
     }
     dragStart = { x: event.clientX, y: event.clientY, depth: peel * depthLimit(), movement: 0 };
@@ -290,7 +267,7 @@
     const moved = dragStart.movement > 6;
     dragStart = null;
     card.classList.remove('is-dragging');
-    setOpen(moved ? peel > .32 : !open);
+    if (!moved) togglePeel();
   };
 
   card.addEventListener('pointerup', endDrag);
@@ -303,7 +280,7 @@
     event.preventDefault();
     interacted = true;
     corner = 'top-right';
-    setOpen(!open);
+    togglePeel();
   });
 
   card.addEventListener('pointerleave', () => {
