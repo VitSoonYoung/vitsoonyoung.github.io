@@ -632,3 +632,32 @@ body.animations-paused .scene-background, body.animations-paused .elf-front, bod
   .language-toggle { position: static; flex-shrink: 0; margin-top: 8px; }
   .site-nav { gap: 8px; }
 }
+
+.partner-list { display: block; height: auto; min-height: calc(88 * var(--u)); overflow-x: auto; scrollbar-width: none; }
+.partner-list::-webkit-scrollbar { display: none; }
+.partner-track, .partner-group { display: flex; align-items: center; gap: clamp(20px, calc(80 * var(--u)), 80px); width: max-content; }
+.partner-track { margin: 0 auto; }
+.partner-logo { flex: 0 0 auto; width: min(200px, calc(var(--partner-width, 200) * var(--u))); }
+.partner-logo img { width: 100%; max-width: 200px; max-height: 120px; }
+.partner-list.is-overflowing .partner-track { margin: 0; animation: partner-marquee var(--marquee-duration) linear infinite; animation-play-state: paused; }
+.partner-list.is-overflowing.is-visible .partner-track { animation-play-state: running; }
+.partner-list.is-overflowing:hover .partner-track, .partner-list.is-overflowing:focus-within .partner-track, body.animations-paused .partner-list.is-overflowing .partner-track { animation-play-state: paused; }
+@keyframes partner-marquee {
+  to { transform: translateX(calc(-1 * var(--marquee-distance))); }
+}
+@media (max-width: 600px) {
+  .partner-list { min-height: 65px; }
+  .partner-track, .partner-group { gap: 24px; }
+  .partner-logo { width: 110px; }
+  .partner-logo img { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .partner-list.is-overflowing .partner-track { animation: none; }
+}
+
+.hero-tags { position: absolute; bottom: calc(100% + 10px); left: 0; width: 100%; z-index: 5; display: flex; justify-content: center; gap: 8px; }
+.hero-tags span { display: inline-flex; align-items: center; padding: 4px 10px; border: 1px solid rgba(143, 223, 255, .4); border-radius: 20px; background: rgba(15, 105, 174, .4); color: #f2fcff; font: 600 clamp(10px, calc(12 * var(--u)), 14px)/1.2 'Inter', sans-serif; backdrop-filter: blur(5px); }
+@media (max-width: 600px) {
+  .hero-tags { bottom: calc(100% + 16px); }
+  .hero-tags span { font-size: 11px; padding: 5px 10px; }
+}

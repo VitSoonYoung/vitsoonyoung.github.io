@@ -70,6 +70,12 @@
     { name: 'Bueno Interactive', image: 'assets/bueno_brand.webp', width: 186, url: 'https://thebuenointeractive.com/' }
   ];
   const partnerList = document.querySelector('.partner-list');
+  const partnerTrack = document.createElement('div');
+  partnerTrack.className = 'partner-track';
+  const partnerGroup = document.createElement('div');
+  partnerGroup.className = 'partner-group';
+  partnerTrack.append(partnerGroup);
+  partnerList.append(partnerTrack);
   PARTNERS_IN_CRIME.forEach(partner => {
     const item = document.createElement(partner.url ? 'a' : 'div');
     item.className = 'partner-logo';
@@ -83,10 +89,41 @@
     image.alt = partner.name;
     image.decoding = 'async';
     if (PARTNER_LOGO_TINT) image.style.filter = partner.preserveShading ? 'url(#partner-logo-shaded-tint)' : 'url(#partner-logo-tint)';
-    image.style.setProperty('--partner-width', String(partner.width || 200));
+    item.style.setProperty('--partner-width', String(partner.width || 200));
     item.append(image);
-    partnerList.append(item);
+    partnerGroup.append(item);
   });
+  const partnerReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const updatePartnerMarquee = () => {
+    const overflow = partnerGroup.getBoundingClientRect().width > partnerList.clientWidth + 1;
+    partnerList.classList.toggle('is-overflowing', overflow);
+    partnerList.tabIndex = overflow ? 0 : -1;
+    partnerList.setAttribute('aria-label', t('Partner logos'));
+    const animate = overflow && !partnerReducedMotion.matches;
+    const existingCopy = partnerTrack.querySelector('.partner-group-copy');
+    if (animate && !existingCopy) {
+      const copy = partnerGroup.cloneNode(true);
+      copy.classList.add('partner-group-copy');
+      copy.setAttribute('aria-hidden', 'true');
+      copy.querySelectorAll('a').forEach(link => link.tabIndex = -1);
+      copy.querySelectorAll('img').forEach(image => image.alt = '');
+      partnerTrack.append(copy);
+    } else if (!animate && existingCopy) existingCopy.remove();
+    const gap = parseFloat(getComputedStyle(partnerTrack).columnGap) || 0;
+    const distance = partnerGroup.getBoundingClientRect().width + gap;
+    partnerTrack.style.setProperty('--marquee-distance', `${distance}px`);
+    partnerTrack.style.setProperty('--marquee-duration', `${distance / 18}s`);
+  };
+  const partnerResizeObserver = new ResizeObserver(updatePartnerMarquee);
+  partnerResizeObserver.observe(partnerList);
+  partnerResizeObserver.observe(partnerGroup);
+  partnerReducedMotion.addEventListener('change', updatePartnerMarquee);
+  document.addEventListener('studio-language-change', updatePartnerMarquee);
+  const partnerVisibilityObserver = new IntersectionObserver(entries => {
+    partnerList.classList.toggle('is-visible', entries[0].isIntersecting);
+  });
+  partnerVisibilityObserver.observe(partnerList);
+  updatePartnerMarquee();
   const CAROUSEL_GAMES = [
     {
       name: 'Christmasing Around', title: 'Christmasing Around',

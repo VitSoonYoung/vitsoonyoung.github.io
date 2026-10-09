@@ -1,11 +1,13 @@
 (() => {
   const VIETNAMESE = {
+  "Partner logos": "Logo đối tác",
   "video trailer": "video giới thiệu",
   "Copyright": "Bản quyền",
   "Abubu Dance on Facebook": "Abubu Dance trên Facebook",
   "Abubu Dance on Instagram": "Abubu Dance trên Instagram",
   "Abubu Dance on Threads": "Abubu Dance trên Threads",
   "Abubu Dance on Discord": "Abubu Dance trên Discord",
+  "Online Co-op": "Co-op trực tuyến",
   "Upcoming": "Sắp ra mắt",
   "Partners": "Đối tác",
   "Games": "Games",
