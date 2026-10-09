@@ -3,8 +3,14 @@
   const canvas = card.querySelector('canvas');
   const context = canvas.getContext('2d');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  const front = new Image();
-  const hintPeel = .05;
+  const front = card.querySelector('.about-video');
+  const poster = new Image();
+  poster.src = front.getAttribute('poster');
+  let userPaused = reduceMotion.matches;
+  let inView = false;
+  let hintFrame = 0;
+  let videoFrame = 0;
+  const hintPeel = .028;
   let width = 0;
   let height = 0;
   let peel = 0;
@@ -84,16 +90,18 @@
   };
 
   const coverImage = () => {
-    const targetWidth = width - 18;
-    const targetHeight = height - 31;
-    const scale = Math.max(targetWidth / front.naturalWidth, targetHeight / front.naturalHeight);
-    const cropWidth = targetWidth / scale;
-    const cropHeight = targetHeight / scale;
-    context.drawImage(front, (front.naturalWidth - cropWidth) / 2, (front.naturalHeight - cropHeight) / 2, cropWidth, cropHeight, 9, 9, targetWidth, targetHeight);
+    const drawable = front.readyState >= 2 ? front : poster;
+    const sourceWidth = drawable === front ? front.videoWidth : poster.naturalWidth;
+    const sourceHeight = drawable === front ? front.videoHeight : poster.naturalHeight;
+    if (!sourceWidth || !sourceHeight) return;
+    const scale = Math.max(width / sourceWidth, height / sourceHeight);
+    const cropWidth = width / scale;
+    const cropHeight = height / scale;
+    context.drawImage(drawable, (sourceWidth - cropWidth) / 2, (sourceHeight - cropHeight) / 2, cropWidth, cropHeight, 0, 0, width, height);
   };
 
   const render = () => {
-    if (!width || !height || !front.naturalWidth) return;
+    if (!width || !height || (!front.videoWidth && !poster.naturalWidth)) return;
     const depth = peel * depthLimit();
     const rectangle = [[0, 0], [width, 0], [width, height], [0, height]];
     const remaining = clipPolygon(rectangle, depth, true);
@@ -185,7 +193,7 @@
     render();
     const lifted = peel > hintPeel + .01;
     card.setAttribute('aria-pressed', String(lifted));
-    card.setAttribute('aria-label', lifted ? 'Unpeel the studio sticker' : 'Peel any corner of the studio sticker to reveal the Abubu Dance picture');
+    card.setAttribute('aria-label', window.studioLanguage.t(lifted ? 'Unpeel the studio sticker' : 'Peel any corner of the studio sticker to reveal Than the cat'));
   };
 
   const stopMotion = () => {
@@ -347,13 +355,67 @@
     render();
   });
 
-  front.addEventListener('load', () => {
+  poster.addEventListener('load', () => {
     card.classList.add('is-ready');
     render();
   });
-  front.src = 'assets/about-sticker.jpg';
+  if (poster.complete && poster.naturalWidth) card.classList.add('is-ready');
+  front.addEventListener('loadeddata', () => {
+    card.classList.add('is-ready');
+    render();
+  });
+  front.addEventListener('seeked', render);
+  const scheduleVideo = () => {
+    if (videoFrame || !inView || front.paused || document.hidden) return;
+    videoFrame = front.requestVideoFrameCallback ? front.requestVideoFrameCallback(renderVideo) : requestAnimationFrame(renderVideo);
+  };
+  const renderVideo = () => {
+    videoFrame = 0;
+    if (inView && !front.paused && !document.hidden) render();
+    scheduleVideo();
+  };
+  const stopVideoFrame = () => {
+    if (front.cancelVideoFrameCallback) front.cancelVideoFrameCallback(videoFrame);
+    else cancelAnimationFrame(videoFrame);
+    videoFrame = 0;
+  };
+  const updateVideo = () => {
+    if (inView && !userPaused && !document.hidden) front.play().catch(() => {});
+    else front.pause();
+    if (inView) {
+      render();
+      startHint();
+    }
+  };
+  front.addEventListener('play', scheduleVideo);
+  front.addEventListener('pause', stopVideoFrame);
+  if (front.readyState >= 2) card.classList.add('is-ready');
+  new IntersectionObserver(entries => {
+    inView = entries[0].isIntersecting;
+    updateVideo();
+  }, { threshold: .05 }).observe(card);
+  reduceMotion.addEventListener('change', () => {
+    userPaused = reduceMotion.matches;
+    updateVideo();
+  });
+  document.addEventListener('visibilitychange', updateVideo);
   new ResizeObserver(resize).observe(canvas);
 
+  const startHint = () => {
+    if (!hintFrame && !interacted && inView && !document.hidden && !reduceMotion.matches) hintFrame = requestAnimationFrame(pulseHint);
+  };
+  const pulseHint = time => {
+    hintFrame = 0;
+    if (interacted || !inView || document.hidden || reduceMotion.matches) return;
+    if (!dragStart && !animation) {
+      corner = 'top-right';
+      peel = hintPeel + Math.sin(time / 1150) * .008;
+      if (front.paused || !front.requestVideoFrameCallback) render();
+    }
+    startHint();
+  };
+
+  document.addEventListener('studio-language-change', render);
   const observer = new IntersectionObserver(entries => {
     if (!entries[0].isIntersecting) return;
     observer.disconnect();
