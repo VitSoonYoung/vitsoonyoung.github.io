@@ -75,7 +75,15 @@
         <div class="about-visual">
           <h2 id="about-title" class="section-title">About Us</h2>
           <div class="team-photo">
-            <img class="team-photo__image" src="assets/about-reveal.jpg" alt="A cozy view of the Abubu Dance game making space">
+            <div class="peel-card" id="about-sticker" role="button" tabindex="0" aria-label="Peel any corner of the studio sticker to reveal the Abubu Dance picture" aria-pressed="false">
+              <div class="peel-card__surface" aria-hidden="true">
+                <div class="peel-card__reveal">
+                  <img src="assets/about-reveal.jpg" alt="">
+                  <span>Abubu Dance</span>
+                </div>
+              </div>
+              <canvas class="peel-card__canvas" aria-hidden="true"></canvas>
+            </div>
             <img class="team-photo__note" src="assets/sticky-note.png" alt="">
             <span class="team-photo__note-copy">Been making<br>weird silly games<br>since 2024</span>
             <img class="team-photo__clip" src="assets/paperclip.png" alt="">
@@ -112,6 +120,7 @@
   <canvas class="cursor-trail" id="cursor-trail" aria-hidden="true"></canvas>
   <img class="custom-cursor" id="custom-cursor" src="assets/cursor.png" alt="" aria-hidden="true">
   <script src="script.js" defer></script>
+  <script src="sticker.js" defer></script>
   <script src="navigation.js" defer></script>
 
 </body>
