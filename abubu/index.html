@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#180968">
+  <meta name="description" content="Christmas Around — a festive adventure from Abubu Dance.">
+  <title>Christmas Around — Abubu Dance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Coda+Caption:wght@800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/CABackground.webp" as="image">
+  <link rel="preload" href="assets/CALogo.png" as="image">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" id="site-header">
+    <a class="site-brand" href="#top" aria-label="Abubu Dance home"><img src="assets/AbubuDanceLogo.png" alt="Abubu Dance"></a>
+    <button class="site-menu-toggle" type="button" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Main navigation">
+      <a href="#top">Upcoming</a>
+      <a href="#partners">Partners</a>
+      <a href="#games">Games</a>
+      <a href="#about">About Us</a>
+    </nav>
+  </header>
+  <main class="page" id="top" aria-label="Christmas Around game landing page">
+    <div class="scene-shell" id="scene-shell">
+      <div class="artboard" id="artboard">
+        <img class="scene-background" src="assets/CABackground.webp" alt="">
+        <div class="scene-fade" aria-hidden="true"></div>
+        <img class="gift" src="assets/CAGift.png" alt="">
+        <img class="elf-front" src="assets/CAElfGift.png" alt="">
+        <img class="game-logo" src="assets/CALogo.png" alt="">
+      </div>
+      <div class="hero-actions" aria-label="Game links">
+        <a class="hero-button hero-button--wishlist" href="https://store.steampowered.com/search/?term=Christmasing%20Around" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">◉</span> Steam</a>
+        <a class="hero-button hero-button--presskit" href="mailto:hi@abubudance.com?subject=Christmasing%20Around%20press%20kit"><span aria-hidden="true">▰</span> Presskit</a>
+      </div>
+    </div>
+
+    <section class="showcase" aria-label="Abubu Dance games and studio">
+      <div class="sky-decorations" aria-hidden="true">
+        <img class="parallax-fish fish-one" data-parallax="0.08" src="assets/goldfish-large.png" alt="">
+        <img class="parallax-fish fish-two" data-parallax="0.12" src="assets/goldfish-large.png" alt="">
+        <img class="parallax-fish fish-three" data-parallax="0.07" src="assets/goldfish-small.png" alt="">
+        <img class="parallax-bubble bubble-one" data-parallax="0.06" src="assets/bubble-small.png" alt="">
+        <img class="parallax-bubble bubble-two" data-parallax="0.1" src="assets/bubble-large.png" alt="">
+        <img class="parallax-bubble bubble-three" data-parallax="0.05" src="assets/bubble-small.png" alt="">
+        <img class="parallax-bubble bubble-four" data-parallax="0.09" src="assets/bubble-large.png" alt="">
+      </div>
+      <section class="partners reveal-on-scroll" id="partners" aria-labelledby="partners-title">
+        <h2 id="partners-title" class="eyebrow">Partner in crimes with</h2>
+        <div class="partner-list">
+          <div class="partner-logo partner-logo--penguin" role="img" aria-label="Nono Penguin"><span>NONO</span><span>PENGUIN</span></div>
+          <div class="partner-logo partner-logo--agugu" role="img" aria-label="Agugu Dance"><span>AGUGU</span><span>DANCE</span></div>
+          <div class="partner-logo partner-logo--peterson" role="img" aria-label="Peterson Bueno"><span>PETERSON</span><span>BUENO</span></div>
+        </div>
+      </section>
+
+      <section class="games reveal-on-scroll" id="games" aria-labelledby="games-title">
+        <h2 id="games-title" class="section-title">Our Games</h2>
+        <div class="game-carousel" id="game-carousel" role="region" aria-label="Game poster carousel. Swipe or use the arrow keys to browse games" tabindex="0">
+          <div class="carousel-track"></div>
+          <span class="visually-hidden" id="carousel-status" aria-live="polite"></span>
+        </div>
+        <div class="game-details">
+          <div class="game-tags"></div>
+          <p class="game-description"></p>
+          <div class="game-actions" aria-label="Game links"></div>
+        </div>
+      </section>
+
+      <section class="about reveal-on-scroll" id="about" aria-labelledby="about-title">
+        <div class="about-visual">
+          <h2 id="about-title" class="section-title">About Us</h2>
+          <div class="team-photo">
+            <img class="team-photo__image" src="assets/about-reveal.jpg" alt="A cozy view of the Abubu Dance game making space">
+            <img class="team-photo__note" src="assets/sticky-note.png" alt="">
+            <span class="team-photo__note-copy">Been making<br>weird silly games<br>since 2024</span>
+            <img class="team-photo__clip" src="assets/paperclip.png" alt="">
+          </div>
+        </div>
+        <div class="about-copy">
+          <p>We’re a small team making weird, silly games that bring people together.</p>
+          <p>We love creating playful worlds, cozy chaos, and unforgettable moments with friends.</p>
+          <p>We would love to hear from you if you’re:</p>
+          <ul>
+            <li>Investors or Publishers</li>
+            <li>Indie Developers</li>
+            <li>Streamers or Presses</li>
+            <li>Curious cats</li>
+          </ul>
+          <a class="contact-button" href="mailto:hi@abubudance.com"><span aria-hidden="true">✉</span> hi@abubudance.com</a>
+        </div>
+      </section>
+
+      <section class="values reveal-on-scroll" id="values" aria-labelledby="values-title">
+        <h2 id="values-title" class="section-title">What we love &amp; yuck!</h2>
+        <div class="value-list">
+          <article class="value-item"><h3>Party</h3><p>Games made to play together</p></article>
+          <article class="value-item"><h3>Incremental</h3><p>Little wins with room to grow</p></article>
+          <article class="value-item"><h3>Story rich</h3><p>Worlds that stay with you</p></article>
+          <article class="value-item"><h3>Silly games</h3><p>A little chaos, a lot of joy</p></article>
+        </div>
+      </section>
+    </section>
+    <footer class="site-footer reveal-on-scroll" id="contact">
+      <p>© 2026 Abubu Dance. All rights reserved.</p>
+    </footer>
+  </main>
+  <canvas class="cursor-trail" id="cursor-trail" aria-hidden="true"></canvas>
+  <img class="custom-cursor" id="custom-cursor" src="assets/cursor.png" alt="" aria-hidden="true">
+  <script src="script.js" defer></script>
+  <script src="navigation.js" defer></script>
+
+</body>
+</html>
