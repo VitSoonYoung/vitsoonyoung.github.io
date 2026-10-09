@@ -410,6 +410,17 @@
 
   const resize = () => {
     const scale = shell.clientWidth / 1232;
+    const mobile = matchMedia('(max-width: 680px)').matches;
+    if (mobile) {
+      const viewportHeight = document.documentElement.clientHeight || innerHeight;
+      board.style.setProperty('--scale', scale);
+      board.style.height = `${viewportHeight / scale}px`;
+      shell.style.height = `${viewportHeight}px`;
+      shell.style.setProperty('--mobile-art-top', '0px');
+      shell.style.setProperty('--mobile-art-height', `${viewportHeight}px`);
+      layoutCarousel();
+      return;
+    }
     const artHeight = 818 * scale;
     const fadeHeight = 818 - FADE_TOP + innerHeight / scale;
     board.style.setProperty('--scale', scale);

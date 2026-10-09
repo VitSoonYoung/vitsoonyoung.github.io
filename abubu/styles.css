@@ -987,16 +987,54 @@ body.cursor-ready .custom-cursor {
   .scene-shell {
     min-height: 100vh;
     min-height: 100svh;
+    height: 100vh !important;
+    height: 100svh !important;
     background: radial-gradient(circle at 50% 42%, rgba(78, 92, 191, .32), transparent 62%), #180968;
   }
 
   .artboard {
-    top: var(--mobile-art-top, 120px);
+    top: 0;
+    height: 100%;
+  }
+
+  .scene-background {
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .scene-fade {
+    display: none;
+  }
+
+  .elf-front {
+    top: auto;
+    bottom: 3%;
+    left: -6%;
+    width: 62%;
+  }
+
+  .gift {
+    top: auto;
+    bottom: 2%;
+    left: 27%;
+    width: 39%;
+  }
+
+  .game-logo {
+    top: auto;
+    right: -3%;
+    bottom: 5%;
+    left: auto;
+    width: 76%;
   }
 
   .hero-actions {
     left: 50%;
-    top: calc(var(--mobile-art-top, 120px) + var(--mobile-art-height, 260px) + 12px);
+    top: auto;
+    bottom: 30%;
     gap: 7px;
     transform: translateX(-50%);
   }
