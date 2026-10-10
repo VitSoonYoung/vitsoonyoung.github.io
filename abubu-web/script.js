@@ -162,7 +162,7 @@
       ]
     },
     {
-      name: 'Sa Hinh 3D', banner: 'assets/sa_hinh.jpg', tags: ['Driving', 'Simulation', '3D'],
+      name: 'Sa Hinh 3D', banner: 'assets/sa_hinh_capsule.png', tags: ['Driving', 'Simulation', '3D'],
       description: 'Get behind the wheel for the Vietnamese B1 driving license exam. Steer through eleven driving tests with timing, scoring, different view angles, and a simulated automatic transmission.',
       buttons: [
         { label: 'App Store', url: 'https://apps.apple.com/app/h%E1%BB%8Dc-l%C3%A1i-sa-hinh-3d/id6748861501', theme: 'primary', external: true },
