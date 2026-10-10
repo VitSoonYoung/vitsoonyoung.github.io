@@ -661,3 +661,5 @@ body.animations-paused .scene-background, body.animations-paused .elf-front, bod
   .hero-tags { bottom: calc(100% + 16px); }
   .hero-tags span { font-size: 11px; padding: 5px 10px; }
 }
+
+.about-copy, .value-item p { color: #fff; }
